@@ -47,7 +47,7 @@ export default function SubmitPage() {
           </div>
           <h2 className="text-4xl font-display text-primary mb-4">Thanks for Submitting!</h2>
           <p className="text-text text-lg mb-8">
-            Your photo is in review. We'll get it up on the gallery soon!
+              Your photo is in review. We&apos;ll get it up on the gallery soon!
           </p>
           <Button variant="secondary" onClick={() => {
             setSubmitted(false)
@@ -88,6 +88,7 @@ export default function SubmitPage() {
               </p>
               {photoPreview && (
                 <div className="mt-4 rounded-lg overflow-hidden border border-border">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={photoPreview} alt="Preview" className="w-full" />
                 </div>
               )}

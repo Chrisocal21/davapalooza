@@ -44,7 +44,7 @@ export default function StorePage() {
           {submitted ? (
             <div className="bg-success/10 border border-success rounded-lg p-6">
               <p className="text-success font-medium">
-                ✓ Thanks! We'll email you when the store launches.
+                ✓ Thanks! We&apos;ll email you when the store launches.
               </p>
             </div>
           ) : (

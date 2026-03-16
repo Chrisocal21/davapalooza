@@ -80,7 +80,7 @@ export default function AdminNewsPage() {
         {/* News List */}
         {mockNewsPosts.length === 0 ? (
           <Card className="p-12 text-center">
-            <p className="text-muted text-lg">No news posts yet. Click "+ Create News Post" to get started.</p>
+            <p className="text-muted text-lg">No news posts yet. Click &quot;+ Create News Post&quot; to get started.</p>
           </Card>
         ) : (
           <div className="space-y-6">

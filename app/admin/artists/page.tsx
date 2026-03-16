@@ -114,7 +114,7 @@ export default function AdminArtistsPage() {
         {/* Artist List */}
         {mockArtists.length === 0 ? (
           <Card className="p-12 text-center">
-            <p className="text-muted text-lg">No artists added yet. Click "+ Add Artist" to get started.</p>
+            <p className="text-muted text-lg">No artists added yet. Click &quot;+ Add Artist&quot; to get started.</p>
           </Card>
         ) : (
           <div className="space-y-4">
