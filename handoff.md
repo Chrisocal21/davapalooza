@@ -3,6 +3,34 @@
 
 ---
 
+## 🚦 Current Status
+
+**Deployment:** Live at Vercel  
+**Phase Complete:** UI/UX + All Public/Admin Pages (Phases 1, 2, 5)  
+**Next Up:** Backend Infrastructure (Database, API, Auth, Moderation)
+
+### Completed ✅
+- [x] Complete design system (colors, typography, components)
+- [x] All public pages (Home, Gallery, Submit, Artists, News, Donate, Store)
+- [x] All admin pages (Dashboard, Queues, Gallery Mgmt, Artists Mgmt, News Mgmt)
+- [x] Responsive layouts and animations
+- [x] Form validation and UI logic
+- [x] Navigation and footer
+- [x] Deployment to Vercel
+
+### In Progress 🔨
+- [ ] Database schema and migration
+- [ ] API routes for submissions and admin operations
+- [ ] Authentication system
+- [ ] Moderation pipeline (text filter + AI)
+- [ ] Image processing and watermarking
+- [ ] Data connectivity
+
+### Next Actions 📋
+See [nextup.md](nextup.md) for detailed backend integration steps and what you need to do.
+
+---
+
 ## Project Overview
 
 **Event Name:** Davapalooza  
@@ -18,17 +46,19 @@
 
 > Phases are ordered with UI/UX and visual foundations first. External integrations and enhancements are last.
 
-1. **Phase 1 — UI/UX Design System & Visual Identity**
-2. **Phase 2 — Public Site Pages (Static + Dynamic)**
-3. **Phase 3 — Photo Submission Flow**
-4. **Phase 4 — Moderation Pipeline (Auto-triage + AI Scan)**
-5. **Phase 5 — Admin Dashboard**
-6. **Phase 6 — Database & Storage Infrastructure**
-7. **Phase 7 — External Integrations & Enhancements**
+1. **Phase 1 — UI/UX Design System & Visual Identity** ✅ COMPLETE
+2. **Phase 2 — Public Site Pages (Static + Dynamic)** ✅ COMPLETE
+3. **Phase 3 — Photo Submission Flow** ⚠️ UI COMPLETE / Backend Pending
+4. **Phase 4 — Moderation Pipeline (Auto-triage + AI Scan)** 🔨 IN PROGRESS
+5. **Phase 5 — Admin Dashboard** ✅ UI COMPLETE / Backend Pending
+6. **Phase 6 — Database & Storage Infrastructure** 🔨 IN PROGRESS
+7. **Phase 7 — External Integrations & Enhancements** 📋 FUTURE
 
 ---
 
-## Phase 1 — UI/UX Design System & Visual Identity
+## Phase 1 — UI/UX Design System & Visual Identity ✅ COMPLETE
+
+**Status:** All design system components built and deployed.
 
 ### Aesthetic Direction
 
@@ -97,7 +127,9 @@ Store (Coming Soon — greyed, non-clickable)
 
 ---
 
-## Phase 2 — Public Site Pages
+## Phase 2 — Public Site Pages ✅ COMPLETE
+
+**Status:** All public pages built with empty states ready for data integration.
 
 ### Pages & Routes
 
@@ -166,7 +198,9 @@ See Phase 3 for full submission flow detail.
 
 ---
 
-## Phase 3 — Photo Submission Flow
+## Phase 3 — Photo Submission Flow ⚠️ UI COMPLETE / Backend Pending
+
+**Status:** Form UI complete and validated. Backend API route needs to be built.
 
 ### Submission Form Fields
 
@@ -202,7 +236,9 @@ POST /api/submit
 
 ---
 
-## Phase 4 — Moderation Pipeline
+## Phase 4 — Moderation Pipeline 🔨 TO BUILD
+
+**Status:** Design documented. Implementation pending.
 
 ### Overview
 
@@ -292,7 +328,9 @@ CREATE TABLE submissions (
 
 ---
 
-## Phase 5 — Admin Dashboard
+## Phase 5 — Admin Dashboard ✅ UI COMPLETE / Backend Pending
+
+**Status:** All admin UI pages built with empty states. Auth and API routes need implementation.
 
 ### Access
 
@@ -353,7 +391,9 @@ POST /api/admin/news      — create/update news post
 
 ---
 
-## Phase 6 — Database & Storage Infrastructure
+## Phase 6 — Database & Storage Infrastructure 🔨 TO BUILD
+
+**Status:** Schema designed. Migration files and client setup pending.
 
 ### Cloudflare D1 Tables
 
@@ -441,7 +481,9 @@ NEXT_PUBLIC_SITE_URL=https://www.southoblockparty.com
 
 ---
 
-## Phase 7 — External Integrations & Enhancements
+## Phase 7 — External Integrations & Enhancements 📋 FUTURE
+
+**Status:** Post-launch enhancements. Not in current scope.
 
 > These are all post-v1. Build and ship the core site first. Come back to these.
 
@@ -487,35 +529,41 @@ NEXT_PUBLIC_SITE_URL=https://www.southoblockparty.com
 
 ## File Structure Overview
 
+**Current Implementation Status:**
+
 ```
-/app
-  /page.tsx                   — Home
-  /gallery/page.tsx
-  /submit/page.tsx
-  /artists/page.tsx
-  /news/page.tsx
-  /donate/page.tsx
-  /store/page.tsx
-  /admin/page.tsx
-  /admin/queue/[type]/page.tsx
-  /admin/gallery/page.tsx
-  /admin/artists/page.tsx
-  /admin/news/page.tsx
-  /api/submit/route.ts
-  /api/admin/queue/route.ts
-  /api/admin/approve/route.ts
-  /api/admin/reject/route.ts
-  /api/admin/artists/route.ts
-  /api/admin/news/route.ts
+/app                                    ✅ All pages built
+  /page.tsx                   — Home    ✅
+  /gallery/page.tsx                     ✅
+  /submit/page.tsx                      ✅
+  /artists/page.tsx                     ✅
+  /news/page.tsx                        ✅
+  /donate/page.tsx                      ✅
+  /store/page.tsx                       ✅
+  /admin/page.tsx                       ✅
+  /admin/dashboard/page.tsx             ✅
+  /admin/queue/[type]/page.tsx          ✅
+  /admin/gallery/page.tsx               ✅
+  /admin/artists/page.tsx               ✅
+  /admin/news/page.tsx                  ✅
+  /api/submit/route.ts                  🔨 TO BUILD
+  /api/admin/queue/route.ts             🔨 TO BUILD
+  /api/admin/approve/route.ts           🔨 TO BUILD
+  /api/admin/reject/route.ts            🔨 TO BUILD
+  /api/admin/artists/route.ts           🔨 TO BUILD
+  /api/admin/news/route.ts              🔨 TO BUILD
 
-/components
-  /ui/                        — Global UI primitives (Phase 1)
-  /gallery/                   — GalleryGrid, GalleryTile, Lightbox
-  /submit/                    — SubmitForm, PhotoPreview
-  /admin/                     — QueueCard, SubmissionCard, StatsBar
-  /layout/                    — NavBar, Footer, AdminNav
+/components                             ✅ All built
+  /ui/                        — Global UI primitives
+    Button.tsx                          ✅
+    Badge.tsx                           ✅
+    Card.tsx                            ✅
+    SectionHeader.tsx                   ✅
+  /layout/                    — Layout components
+    NavBar.tsx                          ✅
+    Footer.tsx                          ✅
 
-/lib
+/lib                                    🔨 TO BUILD
   /db.ts                      — D1 client setup
   /r2.ts                      — R2 client setup
   /moderation/
@@ -525,12 +573,15 @@ NEXT_PUBLIC_SITE_URL=https://www.southoblockparty.com
   /watermark.ts               — Sharp watermark logic
   /auth.ts                    — Admin session/cookie logic
 
-/public
-  /fonts/                     — Self-hosted fallbacks if needed
+/db                                     🔨 TO BUILD
+  schema.sql                  — Database migration
 
-next.config.js
-tailwind.config.js
-.env.local
+/public                                 ✅
+  /fonts/                     — (if needed)
+
+next.config.js                          ✅
+tailwind.config.js                      ✅
+.env.local.example                      ✅
 ```
 
 ---
@@ -555,23 +606,41 @@ tailwind.config.js
 
 Build in this exact order to avoid dependency issues:
 
-1. Project scaffold (Next.js 14, Tailwind, Cloudflare bindings)
-2. Design system + global CSS variables + font imports
-3. Global components (NavBar, Footer, Button, Card, Badge)
-4. D1 schema migration + R2 bucket setup
-5. Home page (static layout, no data yet)
-6. Gallery page (static mock data first, wire to D1 after)
-7. Submit form (UI only, then wire to API)
-8. Submission API route + R2 upload
-9. Text filter + image scan pipeline
-10. Admin password gate + session
-11. Admin dashboard home (queue counts)
-12. Queue views (Looks Good + Needs Review)
-13. Approve/reject API routes + watermark logic
-14. Artists page + admin artists management
-15. News page + admin news management
-16. Store coming soon page + email capture
-17. Donate page placeholder
-18. Polish: animations, mobile QA, responsive fixes
-19. Deploy to Vercel + configure Cloudflare bindings
-20. Phase 7 integrations (post-launch)
+### ✅ Completed
+1. ✅ Project scaffold (Next.js 14, Tailwind, Cloudflare bindings)
+2. ✅ Design system + global CSS variables + font imports
+3. ✅ Global components (NavBar, Footer, Button, Card, Badge)
+4. ✅ Home page (empty states ready for data)
+5. ✅ Gallery page (UI ready for data)
+6. ✅ Submit form (UI complete, API pending)
+7. ✅ Artists page + admin artists management (UI complete)
+8. ✅ News page + admin news management (UI complete)
+9. ✅ Store coming soon page + email capture
+10. ✅ Donate page placeholder
+11. ✅ Admin password gate + session (UI complete)
+12. ✅ Admin dashboard home (queue counts UI)
+13. ✅ Queue views (Looks Good + Needs Review UI)
+14. ✅ Polish: animations, mobile QA, responsive fixes
+15. ✅ Deploy to Vercel
+
+### 🔨 In Progress / Next Up
+16. 🔨 D1 schema migration + R2 bucket setup
+17. 🔨 Database and R2 client libraries
+18. 🔨 Submission API route + R2 upload
+19. 🔨 Text filter + image scan pipeline
+20. 🔨 Admin authentication system + session management
+21. 🔨 Approve/reject API routes + watermark logic
+22. 🔨 Wire all pages to real data (replace empty states)
+23. ⏳ Configure Cloudflare bindings in Vercel
+24. ⏳ Phase 7 integrations (post-launch)
+
+---
+
+## 🎯 Next Steps for Backend
+
+See **[nextup.md](nextup.md)** for:
+- What YOU need to do (Cloudflare setup, API keys, env vars)
+- What I'M building (database, API routes, auth, moderation)
+- Step-by-step instructions when you're ready
+
+**Your Action:** Review [nextup.md](nextup.md) and let me know when you want to proceed with backend integration.
