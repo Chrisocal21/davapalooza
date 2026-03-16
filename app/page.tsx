@@ -75,16 +75,16 @@ export default function Home() {
             title="Latest News" 
             subtitle="What's happening"
           />
-          <div className="bg-surface border border-border rounded-lg p-6 mt-8">
-            <p className="text-muted text-sm mb-2 font-mono">March 15, 2026</p>
-            <h3 className="text-2xl font-display mb-3">Welcome to Davapalooza</h3>
-            <p className="text-text mb-4">
-              The South O Block Party is coming soon. Stay tuned for date announcements, 
-              artist reveals, and more community updates.
           {/* TODO: Fetch latest news post from API */}
           <Card className="p-8 mt-8 text-center">
             <p className="text-muted">Check back soon for news and updates!</p>
-          </CardassName="max-w-2xl mx-auto text-center">
+          </Card>
+        </div>
+      </section>
+
+      {/* Donate CTA */}
+      <section className="py-16 px-4 bg-gradient-to-t from-surface to-bg">
+        <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-5xl font-display text-primary mb-4">
             Support the Block
           </h2>
