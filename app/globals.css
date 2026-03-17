@@ -7,13 +7,13 @@
 :root {
   --color-bg: #0e0e0e;
   --color-surface: #1a1a1a;
-  --color-primary: #f5c842;
+  --color-primary: #16a1cf;
   --color-secondary: #e84c2b;
   --color-text: #f0ede6;
   --color-muted: #7a7672;
   --color-border: #2e2e2e;
   --color-success: #4caf7d;
-  --color-warning: #f5a623;
+  --color-warning: #16a1cf;
   --color-danger: #e84c2b;
 }
 
