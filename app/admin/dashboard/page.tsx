@@ -110,13 +110,6 @@ export default function AdminDashboard() {
           <h3 className="text-2xl font-display text-text mb-6">Recent Activity</h3>
           <p className="text-muted text-center py-8">No recent activity</p>
         </Card>
-                  </div>
-                  <span className="text-muted text-sm">{item.time}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
 
         {/* Quick Links */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
