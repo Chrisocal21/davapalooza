@@ -3,15 +3,21 @@
 
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy-load OpenAI client to avoid build-time errors
+function getOpenAIClient() {
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 export async function scanImage(imageBuffer: Buffer): Promise<'pass' | 'flag' | 'error'> {
   try {
     // Convert buffer to base64
     const base64Image = imageBuffer.toString('base64');
     const dataUrl = `data:image/jpeg;base64,${base64Image}`;
+
+    // Get OpenAI client
+    const openai = getOpenAIClient();
 
     // Call OpenAI Vision API
     const response = await openai.chat.completions.create({
