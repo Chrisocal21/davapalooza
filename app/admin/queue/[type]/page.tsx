@@ -1,34 +1,67 @@
 'use client'
 
-import { use } from 'react'
+import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 
-// TODO: Fetch from API
-const mockSubmissions: Record<string, Array<any>> = {
-  'looks-good': [],
-  'needs-review': [],
-}
-
 export default function QueuePage({ params }: { params: Promise<{ type: string }> }) {
   const { type } = use(params)
   const queueType = type as 'looks-good' | 'needs-review'
-  const submissions = mockSubmissions[queueType] || []
+  const [submissions, setSubmissions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   
   const title = queueType === 'looks-good' ? 'Looks Good' : 'Needs Review'
   const subtitle = queueType === 'looks-good' ? 'Auto-triaged submissions' : 'Flagged for attention'
 
-  const handleApprove = (id: string) => {
-    console.log('Approving:', id)
-    // TODO: Wire to API
+  useEffect(() => {
+    fetchSubmissions()
+  }, [queueType])
+
+  const fetchSubmissions = async () => {
+    try {
+      const response = await fetch(`/api/admin/queue?type=${queueType.replace('-', '_')}`)
+      if (response.ok) {
+        const data = await response.json()
+        setSubmissions(data.submissions || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch submissions:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleReject = (id: string) => {
-    console.log('Rejecting:', id)
-    // TODO: Wire to API
+  const handleApprove = async (id: string) => {
+    try {
+      const response = await fetch('/api/admin/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      if (response.ok) {
+        fetchSubmissions() // Refresh the list
+      }
+    } catch (error) {
+      console.error('Failed to approve:', error)
+    }
+  }
+
+  const handleReject = async (id: string) => {
+    try {
+      const response = await fetch('/api/admin/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      if (response.ok) {
+        fetchSubmissions() // Refresh the list
+      }
+    } catch (error) {
+      console.error('Failed to reject:', error)
+    }
   }
 
   return (
@@ -59,8 +92,19 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
             {submissions.map((submission) => (
               <Card key={submission.id} className="overflow-hidden">
                 {/* Image Preview */}
-                <div className="aspect-square bg-surface flex items-center justify-center border-b border-border">
-                  <span className="text-muted">Photo Preview</span>
+                <div className="aspect-square bg-surface border-b border-border overflow-hidden">
+                  {submission.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img 
+                      src={submission.imageUrl} 
+                      alt={`Photo by ${submission.handle}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-muted">Photo Preview</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Details */}
@@ -77,16 +121,16 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
                   )}
 
                   <div className="flex gap-2">
-                    <Badge variant={submission.textFilter === 'pass' ? 'approved' : 'flagged'}>
-                      Text: {submission.textFilter}
+                    <Badge variant={submission.text_filter_result === 'pass' ? 'approved' : 'flagged'}>
+                      Text: {submission.text_filter_result}
                     </Badge>
-                    <Badge variant={submission.imageScan === 'pass' ? 'approved' : 'flagged'}>
-                      Image: {submission.imageScan}
+                    <Badge variant={submission.image_scan_result === 'pass' ? 'approved' : 'flagged'}>
+                      Image: {submission.image_scan_result}
                     </Badge>
                   </div>
 
                   <p className="text-muted text-xs font-mono">
-                    Submitted {new Date(submission.submittedAt).toLocaleString()}
+                    Submitted {new Date(submission.submitted_at).toLocaleString()}
                   </p>
 
                   {/* Actions */}

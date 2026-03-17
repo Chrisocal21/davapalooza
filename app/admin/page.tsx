@@ -14,11 +14,20 @@ export default function AdminLoginPage() {
     e.preventDefault()
     setError('')
     
-    // TODO: Wire to actual auth API
-    if (password === 'admin') {
-      router.push('/admin/dashboard')
-    } else {
-      setError('Incorrect password')
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+
+      if (response.ok) {
+        router.push('/admin/dashboard')
+      } else {
+        setError('Incorrect password')
+      }
+    } catch (error) {
+      setError('Login failed. Please try again.')
     }
   }
 

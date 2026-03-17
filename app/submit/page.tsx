@@ -13,12 +13,16 @@ export default function SubmitPage() {
     name: '',
     agreed: false,
   })
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      setPhotoFile(file)
       const reader = new FileReader()
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string)
@@ -29,9 +33,34 @@ export default function SubmitPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Wire to API
-    console.log('Submitting:', formData)
-    setSubmitted(true)
+    setError('')
+    setSubmitting(true)
+
+    try {
+      const formDataToSend = new FormData()
+      if (photoFile) formDataToSend.append('photo', photoFile)
+      formDataToSend.append('handle', formData.handle)
+      if (formData.platform) formDataToSend.append('platform', formData.platform)
+      if (formData.caption) formDataToSend.append('caption', formData.caption)
+      if (formData.name) formDataToSend.append('name', formData.name)
+      formDataToSend.append('agreement', 'true')
+
+      const response = await fetch('/api/submit', {
+        method: 'POST',
+        body: formDataToSend,
+      })
+
+      if (response.ok) {
+        setSubmitted(true)
+      } else {
+        const data = await response.json()
+        setError(data.error || 'Submission failed. Please try again.')
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const isFormValid = formData.handle && formData.agreed && photoPreview
@@ -52,6 +81,7 @@ export default function SubmitPage() {
           <Button variant="secondary" onClick={() => {
             setSubmitted(false)
             setPhotoPreview(null)
+            setPhotoFile(null)
             setFormData({ handle: '', platform: '', caption: '', name: '', agreed: false })
           }}>
             Submit Another Photo
@@ -178,14 +208,17 @@ export default function SubmitPage() {
             </div>
 
             {/* Submit Button */}
+            {error && (
+              <p className="text-danger text-sm">{error}</p>
+            )}
             <Button 
               type="submit" 
               variant="primary" 
               size="lg" 
-              disabled={!isFormValid}
+              disabled={!isFormValid || submitting}
               className="w-full"
             >
-              Submit Photo
+              {submitting ? 'Submitting...' : 'Submit Photo'}
             </Button>
           </form>
         </Card>

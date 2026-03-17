@@ -1,21 +1,42 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 
-// TODO: Fetch from API
-const queueStats = {
-  looksGood: 0,
-  needsReview: 0,
-  totalApproved: 0,
-  totalRejected: 0,
-}
-
-const recentActivity: Array<{ id: number; action: string; handle: string; time: string }> = []
-
 export default function AdminDashboard() {
+  const [queueStats, setQueueStats] = useState({
+    looksGood: 0,
+    needsReview: 0,
+    totalApproved: 0,
+    totalRejected: 0,
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchStats()
+  }, [])
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/admin/dashboard')
+      if (response.ok) {
+        const data = await response.json()
+        setQueueStats({
+          looksGood: data.queueCounts.looks_good || 0,
+          needsReview: data.queueCounts.needs_review || 0,
+          totalApproved: 0, // Will enhance later
+          totalRejected: 0,
+        })
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-7xl mx-auto">
@@ -87,17 +108,8 @@ export default function AdminDashboard() {
         {/* Recent Activity */}
         <Card className="p-6">
           <h3 className="text-2xl font-display text-text mb-6">Recent Activity</h3>
-          {recentActivity.length === 0 ? (
-            <p className="text-muted text-center py-8">No recent activity</p>
-          ) : (
-            <div className="space-y-3">
-              {recentActivity.map((item) => (
-                <div key={item.id} className="flex items-center justify-between py-3 border-b border-border last:border-0">
-                  <div className="flex items-center gap-3">
-                    <Badge variant={item.action === 'Approved' ? 'approved' : 'rejected'}>
-                      {item.action}
-                    </Badge>
-                    <span className="text-text font-mono">{item.handle}</span>
+          <p className="text-muted text-center py-8">No recent activity</p>
+        </Card>
                   </div>
                   <span className="text-muted text-sm">{item.time}</span>
                 </div>
