@@ -1,7 +1,12 @@
 name = "davapalooza"
 compatibility_date = "2024-01-01"
+pages_build_output_dir = ".vercel/output/static"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "davapalooza-db"
 database_id = "8992dd8c-d737-4f8f-89d1-42a94f4fdbec"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "southoblockparty-media"
