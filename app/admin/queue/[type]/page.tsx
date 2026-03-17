@@ -12,9 +12,14 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
   const queueType = type as 'looks-good' | 'needs-review'
   const [submissions, setSubmissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   
   const title = queueType === 'looks-good' ? 'Looks Good' : 'Needs Review'
   const subtitle = queueType === 'looks-good' ? 'Auto-triaged submissions' : 'Flagged for attention'
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     fetchSubmissions()
@@ -134,24 +139,26 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
                   </p>
 
                   {/* Actions */}
-                  <div className="flex gap-2 pt-2">
-                    <Button 
-                      variant="primary" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleApprove(submission.id)}
-                    >
-                      ✓ Approve
-                    </Button>
-                    <Button 
-                      variant="danger" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleReject(submission.id)}
-                    >
-                      ✕ Reject
-                    </Button>
-                  </div>
+                  {mounted && (
+                    <div className="flex gap-2 pt-2">
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleApprove(submission.id)}
+                      >
+                        ✓ Approve
+                      </Button>
+                      <Button 
+                        variant="danger" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleReject(submission.id)}
+                      >
+                        ✕ Reject
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </Card>
             ))}
