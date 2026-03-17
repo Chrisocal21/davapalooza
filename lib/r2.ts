@@ -1,30 +1,20 @@
 // Cloudflare R2 storage client
-// S3-compatible API for uploading, downloading, and managing files
+// Direct R2 binding access (preferred for Cloudflare Workers)
 
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { R2Bucket } from '@cloudflare/workers-types';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
-// Initialize R2 client with Cloudflare credentials
-export function getR2Client(): S3Client {
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const accessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
-
-  if (!accountId || !accessKeyId || !secretAccessKey) {
-    throw new Error('Missing R2 credentials in environment variables');
+// Get R2 bucket from Cloudflare context
+export function getR2Bucket(): R2Bucket {
+  try {
+    const { env } = getCloudflareContext();
+    return env.R2 as R2Bucket;
+  } catch (error) {
+    throw new Error('Unable to access R2 bucket. Make sure R2 binding is configured in wrangler.toml');
   }
-
-  return new S3Client({
-    region: 'auto',
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-    credentials: {
-      accessKeyId,
-      secretAccessKey,
-    },
-  });
 }
 
-export const BUCKET_NAME = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'southoblockparty-media';
-export const PUBLIC_URL = process.env.CLOUDFLARE_R2_PUBLIC_URL || 'https://media.southoblockparty.com';
+export const PUBLIC_URL = 'https://pub-a3656c448d10463daaa2f66d77665216.r2.dev';
 
 // R2 path structure
 export const R2_PATHS = {
@@ -42,51 +32,34 @@ export async function uploadToR2(
   file: Buffer | Uint8Array,
   contentType: string
 ): Promise<void> {
-  const client = getR2Client();
+  const bucket = getR2Bucket();
   
-  await client.send(
-    new PutObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: key,
-      Body: file,
-      ContentType: contentType,
-    })
-  );
+  await bucket.put(key, file, {
+    httpMetadata: {
+      contentType,
+    },
+  });
 }
 
 // Download file from R2
 export async function downloadFromR2(key: string): Promise<Buffer> {
-  const client = getR2Client();
+  const bucket = getR2Bucket();
   
-  const response = await client.send(
-    new GetObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: key,
-    })
-  );
-
-  if (!response.Body) {
-    throw new Error('No file body returned from R2');
+  const object = await bucket.get(key);
+  
+  if (!object) {
+    throw new Error(`File not found in R2: ${key}`);
   }
 
   // Convert stream to buffer
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of response.Body as any) {
-    chunks.push(chunk);
-  }
-  return Buffer.concat(chunks);
+  const arrayBuffer = await object.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 }
 
 // Delete file from R2
 export async function deleteFromR2(key: string): Promise<void> {
-  const client = getR2Client();
-  
-  await client.send(
-    new DeleteObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: key,
-    })
-  );
+  const bucket = getR2Bucket();
+  await bucket.delete(key);
 }
 
 // Get public URL for a file

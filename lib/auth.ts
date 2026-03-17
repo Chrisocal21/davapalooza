@@ -3,26 +3,47 @@
 
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 const SESSION_COOKIE_NAME = 'admin_session';
 const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Get the secret key for signing JWTs
 function getSecretKey(): Uint8Array {
-  const secret = process.env.ADMIN_SESSION_SECRET;
-  if (!secret) {
-    throw new Error('ADMIN_SESSION_SECRET environment variable is not set');
+  try {
+    const { env } = getCloudflareContext();
+    const secret = env.ADMIN_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET;
+    if (!secret) {
+      throw new Error('ADMIN_SESSION_SECRET environment variable is not set');
+    }
+    return new TextEncoder().encode(secret as string);
+  } catch (error) {
+    // Fallback to process.env for non-Cloudflare environments
+    const secret = process.env.ADMIN_SESSION_SECRET;
+    if (!secret) {
+      throw new Error('ADMIN_SESSION_SECRET environment variable is not set');
+    }
+    return new TextEncoder().encode(secret);
   }
-  return new TextEncoder().encode(secret);
 }
 
 // Verify admin password
 export function verifyPassword(password: string): boolean {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) {
-    throw new Error('ADMIN_PASSWORD environment variable is not set');
+  try {
+    const { env } = getCloudflareContext();
+    const adminPassword = env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD;
+    if (!adminPassword) {
+      throw new Error('ADMIN_PASSWORD environment variable is not set');
+    }
+    return password === adminPassword;
+  } catch (error) {
+    // Fallback to process.env for non-Cloudflare environments  
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) {
+      throw new Error('ADMIN_PASSWORD environment variable is not set');
+    }
+    return password === adminPassword;
   }
-  return password === adminPassword;
 }
 
 // Create admin session token

@@ -2,6 +2,7 @@
 // Handles all database queries for submissions, gallery, artists, news
 
 import { D1Database } from '@cloudflare/workers-types';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 // Type definitions for our database records
 export interface Submission {
@@ -58,10 +59,14 @@ export interface StoreEmail {
   captured_at: string;
 }
 
-// Get D1 database instance from environment
+// Get D1 database instance from Cloudflare context
 export function getDB(): D1Database {
-  // @ts-ignore - runtime binding from Vercel edge config
-  return process.env.DB as D1Database;
+  try {
+    const { env } = getCloudflareContext();
+    return env.DB as D1Database;
+  } catch (error) {
+    throw new Error('Unable to access D1 database. Make sure DB binding is configured in wrangler.toml');
+  }
 }
 
 // Submission queries

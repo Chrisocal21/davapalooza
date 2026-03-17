@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getDB, submissionQueries, galleryQueries } from '@/lib/db';
 import { downloadFromR2, uploadToR2, R2_PATHS, getFileExtension } from '@/lib/r2';
-import { processImageForGallery } from '@/lib/watermark';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,13 +35,20 @@ export async function POST(request: NextRequest) {
     // Download original image from R2
     const originalImage = await downloadFromR2(submission.original_r2_key);
 
-    // Apply watermark and optimize
-    const watermarkedImage = await processImageForGallery(originalImage, submission.handle);
+    // TODO: Apply watermark when we have a Workers-compatible solution
+    // For now, just copy the original image to gallery
+    const watermarkedImage = originalImage;
 
-    // Upload watermarked image to gallery folder
+    // Upload to gallery folder
     const fileExtension = getFileExtension(submission.original_r2_key);
     const watermarkedKey = R2_PATHS.gallery(id, fileExtension);
-    await uploadToR2(watermarkedKey, watermarkedImage, 'image/jpeg');
+    
+    // Determine content type from extension
+    let contentType = 'image/jpeg';
+    if (fileExtension === 'png') contentType = 'image/png';
+    if (fileExtension === 'heic' || fileExtension === 'heif') contentType = 'image/heic';
+    
+    await uploadToR2(watermarkedKey, watermarkedImage, contentType);
 
     // Update submission status
     await submissionQueries.approve(db, id, watermarkedKey);
