@@ -1,0 +1,5 @@
+# Cloudflare Pages exclusions
+node_modules
+.git
+.env*
+.next/cache
