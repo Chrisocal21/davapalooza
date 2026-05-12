@@ -39,6 +39,10 @@ export interface Artist {
   genre: string | null;
   bio: string | null;
   social_url: string | null;
+  instagram: string | null;
+  tiktok: string | null;
+  spotify: string | null;
+  website: string | null;
   photo_r2_key: string | null;
   year: number;
   set_time: string | null;
@@ -303,6 +307,10 @@ export const artistQueries = {
       genre?: string;
       bio?: string;
       social_url?: string;
+      instagram?: string;
+      tiktok?: string;
+      spotify?: string;
+      website?: string;
       photo_r2_key?: string;
       year: number;
       set_time?: string;
@@ -310,8 +318,8 @@ export const artistQueries = {
   ): Promise<void> {
     await db
       .prepare(
-        `INSERT INTO artists (id, name, genre, bio, social_url, photo_r2_key, year, set_time)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO artists (id, name, genre, bio, social_url, instagram, tiktok, spotify, website, photo_r2_key, year, set_time)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         data.id,
@@ -319,6 +327,10 @@ export const artistQueries = {
         data.genre || null,
         data.bio || null,
         data.social_url || null,
+        data.instagram || null,
+        data.tiktok || null,
+        data.spotify || null,
+        data.website || null,
         data.photo_r2_key || null,
         data.year,
         data.set_time || null

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     await requireAuth();
 
     const body = await request.json();
-    const { name, genre, bio, year, set_time } = body;
+    const { name, genre, bio, year, set_time, instagram, tiktok, spotify, website } = body;
 
     // Validate required fields
     if (!name || !year) {
@@ -54,6 +54,10 @@ export async function POST(request: NextRequest) {
       bio: bio || undefined,
       year: parseInt(year),
       set_time: set_time || undefined,
+      instagram: instagram || undefined,
+      tiktok: tiktok || undefined,
+      spotify: spotify || undefined,
+      website: website || undefined,
     });
 
     return NextResponse.json({
@@ -88,6 +92,10 @@ export async function PUT(request: NextRequest) {
     const genre = formData.get('genre') as string;
     const bio = formData.get('bio') as string;
     const social_url = formData.get('social_url') as string;
+    const instagram = formData.get('instagram') as string;
+    const tiktok = formData.get('tiktok') as string;
+    const spotify = formData.get('spotify') as string;
+    const website = formData.get('website') as string;
     const year = formData.get('year') as string;
     const set_time = formData.get('set_time') as string;
     const photo = formData.get('photo') as File | null;
@@ -103,11 +111,15 @@ export async function PUT(request: NextRequest) {
     const updateData: any = {};
 
     if (name) updateData.name = name;
-    if (genre) updateData.genre = genre;
-    if (bio) updateData.bio = bio;
-    if (social_url) updateData.social_url = social_url;
+    if (genre !== null) updateData.genre = genre || null;
+    if (bio !== null) updateData.bio = bio || null;
+    if (social_url !== null) updateData.social_url = social_url || null;
+    if (instagram !== null) updateData.instagram = instagram || null;
+    if (tiktok !== null) updateData.tiktok = tiktok || null;
+    if (spotify !== null) updateData.spotify = spotify || null;
+    if (website !== null) updateData.website = website || null;
     if (year) updateData.year = parseInt(year);
-    if (set_time) updateData.set_time = set_time;
+    if (set_time !== null) updateData.set_time = set_time || null;
 
     // Upload new photo if provided
     if (photo && photo.size > 0) {
