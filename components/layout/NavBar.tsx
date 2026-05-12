@@ -1,10 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
 export default function NavBar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   const navLinks = [
     { href: '/gallery', label: 'Gallery' },
@@ -27,15 +29,18 @@ export default function NavBar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.href}
-                href={link.href}
-                className="text-text hover:text-primary transition-colors font-medium"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = pathname === link.href || pathname.startsWith(link.href + '/')
+              return (
+                <Link 
+                  key={link.href}
+                  href={link.href}
+                  className={`transition-colors font-medium ${active ? 'text-primary' : 'text-text hover:text-primary'}`}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
             <span className="text-muted cursor-not-allowed">
               Store <span className="text-xs">(Coming Soon)</span>
             </span>
@@ -67,16 +72,19 @@ export default function NavBar() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-surface border-t border-border">
           <div className="px-4 py-4 space-y-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block text-text hover:text-primary transition-colors py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = pathname === link.href
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`block transition-colors py-2 ${active ? 'text-primary' : 'text-text hover:text-primary'}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
             <span className="block text-muted py-2">
               Store <span className="text-xs">(Coming Soon)</span>
             </span>

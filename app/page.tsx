@@ -140,7 +140,11 @@ export default function Home() {
             subtitle="Community snapshots from the block"
           />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-            {photos.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="aspect-square rounded-lg bg-surface animate-pulse" />
+              ))
+            ) : photos.length === 0 ? (
               <Card className="col-span-2 md:col-span-4 p-8 text-center">
                 <p className="text-muted">No photos yet. Be the first to share your Davapalooza moments!</p>
               </Card>
@@ -175,7 +179,16 @@ export default function Home() {
             subtitle="Artists bringing the heat"
           />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            {artists.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="rounded-xl bg-surface border border-border p-6 space-y-3 animate-pulse">
+                  <div className="h-6 bg-border rounded w-2/3" />
+                  <div className="h-3 bg-border rounded w-1/3" />
+                  <div className="h-3 bg-border rounded w-full" />
+                  <div className="h-3 bg-border rounded w-4/5" />
+                </div>
+              ))
+            ) : artists.length === 0 ? (
               <Card className="col-span-1 md:col-span-3 p-8 text-center">
                 <p className="text-muted">Artist lineup coming soon!</p>
               </Card>
@@ -215,9 +228,12 @@ export default function Home() {
             subtitle="What's happening"
           />
           {loading ? (
-            <Card className="p-8 mt-8 text-center">
-              <p className="text-muted">Loading...</p>
-            </Card>
+            <div className="mt-8 rounded-xl bg-surface border border-border p-8 space-y-4 animate-pulse">
+              <div className="h-4 bg-border rounded w-1/4" />
+              <div className="h-6 bg-border rounded w-3/4" />
+              <div className="h-3 bg-border rounded w-full" />
+              <div className="h-3 bg-border rounded w-5/6" />
+            </div>
           ) : !latestNews ? (
             <Card className="p-8 mt-8 text-center">
               <p className="text-muted">Check back soon for news and updates!</p>

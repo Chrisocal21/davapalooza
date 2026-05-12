@@ -15,6 +15,7 @@
 
 # open-next (Cloudflare Workers build output)
 /.open-next/
+/.wrangler/
 
 # production
 /build
