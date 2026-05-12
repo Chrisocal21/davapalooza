@@ -58,26 +58,31 @@ export default function ArtistsPage() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {currentYearArtists.map((artist) => (
-                <Card key={artist.id} className="p-6">
-                  <h4 className="text-xl font-display text-primary mb-2">
+              {currentYearArtists.map((artist, i) => (
+                <Card key={artist.id} className="relative p-6 overflow-hidden">
+                  {/* Slot number */}
+                  <span className="absolute top-4 right-4 font-display text-5xl text-border select-none leading-none">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h4 className="text-2xl font-display text-primary mb-1 pr-10">
                     {artist.name}
                   </h4>
                   {artist.genre && (
-                    <p className="text-muted text-sm font-mono mb-2">
+                    <p className="text-secondary text-xs font-mono tracking-widest uppercase mb-3">
                       {artist.genre}
                     </p>
                   )}
                   {artist.bio && (
-                    <p className="text-text text-sm mb-3">
+                    <p className="text-muted text-sm mb-4 leading-relaxed">
                       {artist.bio}
                     </p>
                   )}
                   {artist.set_time && (
-                    <div className="border-t border-border pt-3">
-                      <p className="text-muted text-xs font-mono">
-                        Set Time: {artist.set_time}
-                      </p>
+                    <div className="mt-auto pt-3 border-t border-border flex items-center gap-2">
+                      <svg className="w-3 h-3 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M13 7h-2v5.414l3.293 3.293 1.414-1.414L13 11.586z"/>
+                      </svg>
+                      <p className="text-primary text-xs font-mono">{artist.set_time}</p>
                     </div>
                   )}
                 </Card>

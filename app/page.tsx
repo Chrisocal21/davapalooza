@@ -29,11 +29,34 @@ interface NewsPost {
   published_at: string;
 }
 
+function useCountdown(target: Date) {
+  const zero = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  const calc = () => {
+    const diff = target.getTime() - Date.now();
+    if (diff <= 0) return zero;
+    return {
+      days:    Math.floor(diff / 86400000),
+      hours:   Math.floor((diff % 86400000) / 3600000),
+      minutes: Math.floor((diff % 3600000) / 60000),
+      seconds: Math.floor((diff % 60000) / 1000),
+    };
+  };
+  const [t, setT] = useState(zero);
+  useEffect(() => {
+    setT(calc());
+    const id = setInterval(() => setT(calc()), 1000);
+    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return t;
+}
+
 export default function Home() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [latestNews, setLatestNews] = useState<NewsPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const countdown = useCountdown(new Date('2026-07-25T12:00:00'));
 
   useEffect(() => {
     // Fetch latest photos
@@ -68,21 +91,39 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden px-4">
+      <section className="grain relative min-h-[85vh] flex items-center justify-center overflow-hidden px-4">
         {/* Glow orb */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-[700px] h-[400px] rounded-full bg-primary/10 blur-[120px] animate-pulse-slow" />
         </div>
-        <div className="relative text-center max-w-4xl mx-auto animate-fade-up">
-          <p className="text-sm font-mono text-primary tracking-widest uppercase mb-4 opacity-80">
-            July 25, 2026 · Griffin St · Oceanside, CA
+        <div className="relative z-10 text-center max-w-4xl mx-auto animate-fade-up">
+          <p className="text-sm font-mono text-primary tracking-widest uppercase mb-6 opacity-80">
+            Griffin St · Oceanside, CA
           </p>
-          <h1 className="text-7xl md:text-9xl font-display text-primary mb-4 drop-shadow-lg">
-            DAVAPALOOZA
+          <h1 className="text-7xl md:text-[10rem] font-display text-primary leading-none mb-2 drop-shadow-lg">
+            DAVA<br className="md:hidden"/>PALOOZA
           </h1>
-          <p className="text-xl md:text-2xl text-muted mb-8 font-mono">
-            #SouthOBlockParty
+          <p className="text-xl md:text-2xl text-muted mb-10 font-mono">
+            #SouthOBlockParty · July 25, 2026
           </p>
+
+          {/* Countdown */}
+          <div className="flex justify-center gap-4 md:gap-8 mb-10">
+            {[
+              { label: 'Days',    val: countdown.days },
+              { label: 'Hours',   val: countdown.hours },
+              { label: 'Minutes', val: countdown.minutes },
+              { label: 'Seconds', val: countdown.seconds },
+            ].map(({ label, val }) => (
+              <div key={label} className="flex flex-col items-center bg-surface/60 border border-border backdrop-blur-sm rounded-xl px-4 md:px-6 py-3 md:py-4 min-w-[64px]">
+                <span className="text-3xl md:text-5xl font-display text-primary leading-none tabular-nums">
+                  {String(val).padStart(2, '0')}
+                </span>
+                <span className="text-muted text-xs font-mono mt-1 tracking-widest uppercase">{label}</span>
+              </div>
+            ))}
+          </div>
+
           <Link href="/submit">
             <Button variant="primary" size="lg">
               Submit Your Photos
@@ -127,7 +168,7 @@ export default function Home() {
       </section>
 
       {/* Artist Teaser */}
-      <section className="py-16 px-4 bg-surface animate-fade-up animate-delay-200">
+      <section className="stripe-bg py-16 px-4 bg-surface animate-fade-up animate-delay-200">
         <div className="max-w-7xl mx-auto">
           <SectionHeader 
             title="The Lineup" 
