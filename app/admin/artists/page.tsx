@@ -187,10 +187,3 @@ export default function AdminArtistsPage() {
   )
 }
 
-  name: string;
-  genre: string | null;
-  bio: string | null;
-  year: number;
-  set_time: string | null;
-}
-
