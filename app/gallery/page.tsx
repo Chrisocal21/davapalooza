@@ -5,6 +5,7 @@ import Link from 'next/link'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import ImageViewer from '@/components/ui/ImageViewer'
+import ShareButton from '@/components/ui/ShareButton'
 
 interface GalleryPhoto {
   id: string;
@@ -88,11 +89,21 @@ export default function GalleryPage() {
                   />
                 </div>
                 <div className="p-4">
-                  <p className="font-mono text-sm text-primary mb-1">{photo.handle}</p>
-                  {photo.caption && <p className="text-text text-sm mb-2">{photo.caption}</p>}
-                  <p className="text-muted text-xs font-mono">
-                    {new Date(photo.approved_at).toLocaleDateString()}
-                  </p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-mono text-sm text-primary mb-1">{photo.handle}</p>
+                      {photo.caption && <p className="text-text text-sm mb-2">{photo.caption}</p>}
+                      <p className="text-muted text-xs font-mono">
+                        {new Date(photo.approved_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <ShareButton
+                      url={`${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/gallery`}
+                      text={`Check out this photo from Davapalooza by ${photo.handle}! #SouthOBlockParty`}
+                      variant="icon"
+                      className="shrink-0 -mt-1 -mr-1"
+                    />
+                  </div>
                 </div>
               </Card>
             ))}

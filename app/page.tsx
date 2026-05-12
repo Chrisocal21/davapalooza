@@ -68,19 +68,20 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-[70vh] flex items-center justify-center bg-gradient-to-b from-surface to-bg px-4">
-        <div className="text-center max-w-4xl mx-auto animate-fade-up">
-          <h1 className="text-7xl md:text-9xl font-display text-primary mb-4">
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden px-4">
+        {/* Glow orb */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="w-[700px] h-[400px] rounded-full bg-primary/10 blur-[120px] animate-pulse-slow" />
+        </div>
+        <div className="relative text-center max-w-4xl mx-auto animate-fade-up">
+          <p className="text-sm font-mono text-primary tracking-widest uppercase mb-4 opacity-80">
+            July 25, 2026 · Griffin St · Oceanside, CA
+          </p>
+          <h1 className="text-7xl md:text-9xl font-display text-primary mb-4 drop-shadow-lg">
             DAVAPALOOZA
           </h1>
-          <p className="text-xl md:text-2xl text-muted mb-2 font-mono">
+          <p className="text-xl md:text-2xl text-muted mb-8 font-mono">
             #SouthOBlockParty
-          </p>
-          <p className="text-lg md:text-xl text-text mb-2">
-            July 25th, 2026
-          </p>
-          <p className="text-lg md:text-xl text-text mb-8">
-            Griffin ST. · Oceanside, California
           </p>
           <Link href="/submit">
             <Button variant="primary" size="lg">

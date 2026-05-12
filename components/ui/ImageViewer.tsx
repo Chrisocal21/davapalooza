@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ShareButton from '@/components/ui/ShareButton';
 
 interface ImageViewerProps {
   images: Array<{
@@ -127,16 +128,23 @@ export default function ImageViewer({ images, initialIndex, onClose }: ImageView
         />
 
         {/* Image Info */}
-        {(currentImage.handle || currentImage.caption) && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-            {currentImage.handle && (
-              <p className="text-primary font-mono text-sm mb-1">{currentImage.handle}</p>
-            )}
-            {currentImage.caption && (
-              <p className="text-white text-sm">{currentImage.caption}</p>
-            )}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+          <div className="flex items-end justify-between">
+            <div>
+              {currentImage.handle && (
+                <p className="text-primary font-mono text-sm mb-1">{currentImage.handle}</p>
+              )}
+              {currentImage.caption && (
+                <p className="text-white text-sm">{currentImage.caption}</p>
+              )}
+            </div>
+            <ShareButton
+              url={typeof window !== 'undefined' ? window.location.origin + '/gallery' : '/gallery'}
+              text={`Check out this photo from Davapalooza by ${currentImage.handle ?? 'the community'}! #SouthOBlockParty`}
+              variant="icon"
+            />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
