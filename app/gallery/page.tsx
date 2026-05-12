@@ -1,17 +1,45 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
+import ImageViewer from '@/components/ui/ImageViewer'
 
-// TODO: Fetch from API
-const mockPhotos: Array<{
+interface GalleryPhoto {
   id: string;
+  submission_id: string;
   handle: string;
-  caption: string;
-  watermarkedUrl: string;
-  submittedAt: string;
-}> = []
+  caption: string | null;
+  watermarked_r2_key: string;
+  approved_at: string;
+  imageUrl: string;
+}
 
 export default function GalleryPage() {
+  const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/gallery')
+      .then(r => r.json())
+      .then(data => {
+        setPhotos(data.photos || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching gallery:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  const openViewer = (index: number) => {
+    setViewerIndex(index);
+    setViewerOpen(true);
+  };
+
   return (
     <div className="min-h-screen py-12 px-4">
       <div className="max-w-7xl mx-auto">
@@ -23,7 +51,7 @@ export default function GalleryPage() {
         {/* Filter Bar */}
         <div className="mt-8 mb-8 flex items-center justify-between">
           <div className="text-muted font-mono text-sm">
-            Showing {mockPhotos.length} photos
+            {loading ? 'Loading...' : `Showing ${photos.length} photos`}
           </div>
           <select className="bg-surface border border-border text-text px-4 py-2 rounded-lg font-sans">
             <option>All Years</option>
@@ -33,7 +61,11 @@ export default function GalleryPage() {
         </div>
 
         {/* Masonry Grid */}
-        {mockPhotos.length === 0 ? (
+        {loading ? (
+          <Card className="p-12 text-center">
+            <p className="text-muted text-lg">Loading photos...</p>
+          </Card>
+        ) : photos.length === 0 ? (
           <Card className="p-12 text-center">
             <p className="text-muted text-lg mb-4">No photos yet. Be the first to submit!</p>
             <Link href="/submit" className="text-primary hover:text-primary/80 font-medium">
@@ -42,16 +74,24 @@ export default function GalleryPage() {
           </Card>
         ) : (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
-            {mockPhotos.map((photo) => (
+            {photos.map((photo, index) => (
               <Card key={photo.id} className="gallery-tile break-inside-avoid overflow-hidden">
-                <div className="aspect-square bg-surface flex items-center justify-center border-b border-border">
-                  <span className="text-muted text-sm">Photo Preview</span>
+                <div 
+                  className="aspect-square bg-surface flex items-center justify-center border-b border-border cursor-pointer hover:opacity-90 transition-opacity overflow-hidden"
+                  onClick={() => openViewer(index)}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.imageUrl}
+                    alt={photo.caption || `Photo by ${photo.handle}`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="p-4">
                   <p className="font-mono text-sm text-primary mb-1">{photo.handle}</p>
-                  <p className="text-text text-sm mb-2">{photo.caption}</p>
+                  {photo.caption && <p className="text-text text-sm mb-2">{photo.caption}</p>}
                   <p className="text-muted text-xs font-mono">
-                    {new Date(photo.submittedAt).toLocaleDateString()}
+                    {new Date(photo.approved_at).toLocaleDateString()}
                   </p>
                 </div>
               </Card>
@@ -59,22 +99,18 @@ export default function GalleryPage() {
           </div>
         )}
 
-        {/* Pagination - only show if there are photos */}
-        {mockPhotos.length > 0 && (
-          <div className="mt-12 flex justify-center gap-2">
-            <button className="px-4 py-2 bg-surface border border-border rounded-lg text-text hover:border-primary transition-colors">
-              Previous
-            </button>
-            <button className="px-4 py-2 bg-primary text-bg rounded-lg font-medium">
-              1
-            </button>
-            <button className="px-4 py-2 bg-surface border border-border rounded-lg text-text hover:border-primary transition-colors">
-              2
-            </button>
-            <button className="px-4 py-2 bg-surface border border-border rounded-lg text-text hover:border-primary transition-colors">
-              Next
-            </button>
-          </div>
+        {/* Image Viewer */}
+        {viewerOpen && photos.length > 0 && (
+          <ImageViewer
+            images={photos.map(p => ({
+              id: p.id,
+              url: p.imageUrl,
+              handle: p.handle,
+              caption: p.caption,
+            }))}
+            initialIndex={viewerIndex}
+            onClose={() => setViewerOpen(false)}
+          />
         )}
       </div>
     </div>

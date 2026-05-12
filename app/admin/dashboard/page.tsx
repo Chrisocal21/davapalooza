@@ -6,13 +6,24 @@ import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 
+interface RecentActivity {
+  id: string;
+  handle: string;
+  status: string;
+  reviewed_at: string;
+  imageUrl: string;
+}
+
 export default function AdminDashboard() {
   const [queueStats, setQueueStats] = useState({
     looksGood: 0,
     needsReview: 0,
     totalApproved: 0,
     totalRejected: 0,
+    totalPending: 0,
+    totalSubmissions: 0,
   })
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -27,9 +38,12 @@ export default function AdminDashboard() {
         setQueueStats({
           looksGood: data.queueCounts.looks_good || 0,
           needsReview: data.queueCounts.needs_review || 0,
-          totalApproved: 0, // Will enhance later
-          totalRejected: 0,
+          totalApproved: data.statusCounts.approved || 0,
+          totalRejected: data.statusCounts.rejected || 0,
+          totalPending: data.statusCounts.pending || 0,
+          totalSubmissions: data.statusCounts.total || 0,
         })
+        setRecentActivity(data.recentActivity || [])
       }
     } catch (error) {
       console.error('Failed to fetch stats:', error)
@@ -93,22 +107,48 @@ export default function AdminDashboard() {
           </Card>
           <Card className="p-6 text-center">
             <p className="text-3xl font-display text-text mb-2">
-              {queueStats.looksGood + queueStats.needsReview}
+              {queueStats.totalPending}
             </p>
             <p className="text-muted text-sm">Pending</p>
           </Card>
           <Card className="p-6 text-center">
             <p className="text-3xl font-display text-text mb-2">
-              {queueStats.totalApproved + queueStats.totalRejected + queueStats.looksGood + queueStats.needsReview}
+              {queueStats.totalSubmissions}
             </p>
             <p className="text-muted text-sm">Total Submissions</p>
           </Card>
         </div>
 
         {/* Recent Activity */}
-        <Card className="p-6">
+        <Card className="p-6 mb-12">
           <h3 className="text-2xl font-display text-text mb-6">Recent Activity</h3>
-          <p className="text-muted text-center py-8">No recent activity</p>
+          {recentActivity.length === 0 ? (
+            <p className="text-muted text-center py-8">No recent activity</p>
+          ) : (
+            <div className="space-y-4">
+              {recentActivity.map((item) => (
+                <div key={item.id} className="flex items-center gap-4 p-3 bg-surface/50 rounded-lg">
+                  <div className="relative w-16 h-16 flex-shrink-0 rounded overflow-hidden bg-surface">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.imageUrl}
+                      alt={`Submission by ${item.handle}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono text-sm text-primary truncate">{item.handle}</p>
+                    <p className="text-xs text-muted">
+                      {new Date(item.reviewed_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <Badge variant={item.status === 'approved' ? 'approved' : 'flagged'}>
+                    {item.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         {/* Quick Links */}

@@ -1,32 +1,91 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 
-// TODO: Fetch from API
-const mockNewsPosts: Array<{ id: string; title: string; body: string; publishedAt: string }> = []
+interface NewsPost {
+  id: string;
+  title: string;
+  body: string;
+  photo_r2_key: string | null;
+  published_at: string;
+}
 
 export default function AdminNewsPage() {
   const [showForm, setShowForm] = useState(false)
+  const [posts, setPosts] = useState<NewsPost[]>([])
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     title: '',
     body: '',
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Publishing news:', formData)
-    // TODO: Wire to API
-    setShowForm(false)
-    setFormData({ title: '', body: '' })
+  useEffect(() => {
+    fetchPosts()
+  }, [])
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('/api/admin/news')
+      if (response.ok) {
+        const data = await response.json()
+        setPosts(data.news || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch news:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleDelete = (id: string) => {
-    console.log('Deleting post:', id)
-    // TODO: Wire to API
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('Publishing news:', formData)
+    
+    try {
+      const response = await fetch('/api/admin/news', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: formData.title, body: formData.body }),
+      })
+      
+      console.log('Response status:', response.status)
+      const data = await response.json()
+      console.log('Response data:', data)
+      
+      if (response.ok) {
+        alert('News post created successfully!')
+        setShowForm(false)
+        setFormData({ title: '', body: '' })
+        fetchPosts()
+      } else {
+        alert('Failed to create post: ' + (data.error || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error creating post:', error)
+      alert('Failed to create post: ' + error)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this news post?')) return
+
+    try {
+      const response = await fetch('/api/admin/news', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      
+      if (response.ok) {
+        fetchPosts()
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error)
+    }
   }
 
   return (
@@ -78,24 +137,27 @@ export default function AdminNewsPage() {
         )}
 
         {/* News List */}
-        {mockNewsPosts.length === 0 ? (
+        {loading ? (
+          <Card className="p-12 text-center">
+            <p className="text-muted text-lg">Loading...</p>
+          </Card>
+        ) : posts.length === 0 ? (
           <Card className="p-12 text-center">
             <p className="text-muted text-lg">No news posts yet. Click &quot;+ Create News Post&quot; to get started.</p>
           </Card>
         ) : (
           <div className="space-y-6">
-            {mockNewsPosts.map((post) => (
+            {posts.map((post) => (
               <Card key={post.id} className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <p className="text-muted text-sm font-mono mb-2">
-                      {new Date(post.publishedAt).toLocaleDateString()}
+                      {new Date(post.published_at).toLocaleDateString()}
                     </p>
                     <h4 className="text-2xl font-display text-primary mb-3">{post.title}</h4>
-                    <p className="text-text">{post.body}</p>
+                    <p className="text-text whitespace-pre-wrap">{post.body}</p>
                   </div>
                   <div className="flex gap-2 ml-4">
-                    <Button variant="ghost" size="sm">Edit</Button>
                     <Button variant="danger" size="sm" onClick={() => handleDelete(post.id)}>Delete</Button>
                   </div>
                 </div>

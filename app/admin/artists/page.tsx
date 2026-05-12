@@ -1,16 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 
-// TODO: Fetch from API
-const mockArtists: Array<{ id: string; name: string; genre: string; year: number; setTime: string; bio: string }> = []
+interface Artist {
+  id: string;
+  name: string;
+  genre: string | null;
+  bio: string | null;
+  year: number;
+  set_time: string | null;
+}
 
 export default function AdminArtistsPage() {
   const [showForm, setShowForm] = useState(false)
+  const [artists, setArtists] = useState<Artist[]>([])
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     genre: '',
@@ -19,17 +27,71 @@ export default function AdminArtistsPage() {
     setTime: '',
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('Saving artist:', formData)
-    // TODO: Wire to API
-    setShowForm(false)
-    setFormData({ name: '', genre: '', bio: '', year: '2026', setTime: '' })
+  useEffect(() => {
+    fetchArtists()
+  }, [])
+
+  const fetchArtists = async () => {
+    try {
+      const response = await fetch('/api/admin/artists')
+      if (response.ok) {
+        const data = await response.json()
+        setArtists(data.artists || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch artists:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleDelete = (id: string) => {
-    console.log('Deleting artist:', id)
-    // TODO: Wire to API
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('Saving artist:', formData)
+    
+    try {
+      const response = await fetch('/api/admin/artists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          genre: formData.genre,
+          bio: formData.bio,
+          year: parseInt(formData.year),
+          set_time: formData.setTime,
+        }),
+      })
+      
+      if (response.ok) {
+        setShowForm(false)
+        setFormData({ name: '', genre: '', bio: '', year: '2026', setTime: '' })
+        fetchArtists()
+      } else {
+        const error = await response.json()
+        alert('Failed to create artist: ' + (error.error || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error creating artist:', error)
+      alert('Failed to create artist')
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this artist?')) return
+
+    try {
+      const response = await fetch('/api/admin/artists', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      
+      if (response.ok) {
+        fetchArtists()
+      }
+    } catch (error) {
+      console.error('Error deleting artist:', error)
+    }
   }
 
   return (
@@ -112,23 +174,26 @@ export default function AdminArtistsPage() {
         )}
 
         {/* Artist List */}
-        {mockArtists.length === 0 ? (
+        {loading ? (
+          <Card className="p-12 text-center">
+            <p className="text-muted text-lg">Loading...</p>
+          </Card>
+        ) : artists.length === 0 ? (
           <Card className="p-12 text-center">
             <p className="text-muted text-lg">No artists added yet. Click &quot;+ Add Artist&quot; to get started.</p>
           </Card>
         ) : (
           <div className="space-y-4">
-            {mockArtists.map((artist) => (
+            {artists.map((artist) => (
               <Card key={artist.id} className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h4 className="text-2xl font-display text-primary mb-2">{artist.name}</h4>
-                    <p className="text-muted font-mono text-sm mb-2">{artist.genre} • {artist.year}</p>
-                    <p className="text-text mb-2">{artist.bio}</p>
-                    <p className="text-muted text-sm">Set Time: {artist.setTime}</p>
+                    <p className="text-muted font-mono text-sm mb-2">{artist.genre || 'No genre'} • {artist.year}</p>
+                    {artist.bio && <p className="text-text mb-2">{artist.bio}</p>}
+                    {artist.set_time && <p className="text-muted text-sm">Set Time: {artist.set_time}</p>}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm">Edit</Button>
                     <Button variant="danger" size="sm" onClick={() => handleDelete(artist.id)}>Delete</Button>
                   </div>
                 </div>

@@ -30,6 +30,7 @@ export interface GalleryPhoto {
   watermarked_r2_key: string;
   approved_at: string;
   sort_order: number;
+  trashed_at: string | null;
 }
 
 export interface Artist {
@@ -150,7 +151,7 @@ export const submissionQueries = {
     await db
       .prepare(
         `UPDATE submissions 
-         SET status = 'approved', watermarked_r2_key = ?, approved_at = ?, reviewed_at = ?
+         SET status = 'approved', watermarked_r2_key = ?, approved_at = ?, reviewed_at = ?, queue = NULL
          WHERE id = ?`
       )
       .bind(watermarked_r2_key, now, now, id)
@@ -162,7 +163,7 @@ export const submissionQueries = {
     await db
       .prepare(
         `UPDATE submissions 
-         SET status = 'rejected', reviewed_at = ?
+         SET status = 'rejected', reviewed_at = ?, queue = NULL
          WHERE id = ?`
       )
       .bind(now, id)
@@ -184,6 +185,47 @@ export const submissionQueries = {
       looks_good: looksGood?.count || 0,
       needs_review: needsReview?.count || 0,
     };
+  },
+
+  async getStatusCounts(db: D1Database): Promise<{ 
+    approved: number; 
+    rejected: number; 
+    pending: number; 
+    total: number 
+  }> {
+    const approved = await db
+      .prepare('SELECT COUNT(*) as count FROM submissions WHERE status = ?')
+      .bind('approved')
+      .first<{ count: number }>();
+    
+    const rejected = await db
+      .prepare('SELECT COUNT(*) as count FROM submissions WHERE status = ?')
+      .bind('rejected')
+      .first<{ count: number }>();
+
+    const pending = await db
+      .prepare('SELECT COUNT(*) as count FROM submissions WHERE status IN (?, ?, ?)')
+      .bind('pending', 'looks_good', 'needs_review')
+      .first<{ count: number }>();
+
+    const total = await db
+      .prepare('SELECT COUNT(*) as count FROM submissions')
+      .first<{ count: number }>();
+
+    return {
+      approved: approved?.count || 0,
+      rejected: rejected?.count || 0,
+      pending: pending?.count || 0,
+      total: total?.count || 0,
+    };
+  },
+
+  async getRecentActivity(db: D1Database, limit: number = 10): Promise<Submission[]> {
+    const result = await db
+      .prepare('SELECT * FROM submissions WHERE reviewed_at IS NOT NULL ORDER BY reviewed_at DESC LIMIT ?')
+      .bind(limit)
+      .all<Submission>();
+    return result.results || [];
   },
 };
 
@@ -217,9 +259,30 @@ export const galleryQueries = {
 
   async getAll(db: D1Database): Promise<GalleryPhoto[]> {
     const result = await db
-      .prepare('SELECT * FROM gallery ORDER BY approved_at DESC')
+      .prepare('SELECT * FROM gallery WHERE trashed_at IS NULL ORDER BY approved_at DESC')
       .all<GalleryPhoto>();
     return result.results || [];
+  },
+
+  async getTrashed(db: D1Database): Promise<GalleryPhoto[]> {
+    const result = await db
+      .prepare('SELECT * FROM gallery WHERE trashed_at IS NOT NULL ORDER BY trashed_at DESC')
+      .all<GalleryPhoto>();
+    return result.results || [];
+  },
+
+  async moveToTrash(db: D1Database, id: string): Promise<void> {
+    await db
+      .prepare('UPDATE gallery SET trashed_at = ? WHERE id = ?')
+      .bind(new Date().toISOString(), id)
+      .run();
+  },
+
+  async restoreFromTrash(db: D1Database, id: string): Promise<void> {
+    await db
+      .prepare('UPDATE gallery SET trashed_at = NULL WHERE id = ?')
+      .bind(id)
+      .run();
   },
 
   async deleteById(db: D1Database, id: string): Promise<void> {

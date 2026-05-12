@@ -33,15 +33,8 @@ export async function POST(request: NextRequest) {
     // Check authentication
     await requireAuth();
 
-    const formData = await request.formData();
-    
-    const name = formData.get('name') as string;
-    const genre = formData.get('genre') as string;
-    const bio = formData.get('bio') as string;
-    const social_url = formData.get('social_url') as string;
-    const year = formData.get('year') as string;
-    const set_time = formData.get('set_time') as string;
-    const photo = formData.get('photo') as File | null;
+    const body = await request.json();
+    const { name, genre, bio, year, set_time } = body;
 
     // Validate required fields
     if (!name || !year) {
@@ -52,24 +45,6 @@ export async function POST(request: NextRequest) {
     }
 
     const artistId = crypto.randomUUID();
-    let photoKey: string | undefined;
-
-    // Upload photo if provided
-    if (photo && photo.size > 0) {
-      if (!isValidImageType(photo.type)) {
-        return NextResponse.json(
-          { error: 'Invalid file type' },
-          { status: 400 }
-        );
-      }
-
-      const arrayBuffer = await photo.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const fileExtension = getFileExtension(photo.name);
-      
-      photoKey = R2_PATHS.artists(artistId, fileExtension);
-      await uploadToR2(photoKey, buffer, photo.type);
-    }
 
     const db = getDB();
     await artistQueries.create(db, {
@@ -77,8 +52,6 @@ export async function POST(request: NextRequest) {
       name,
       genre: genre || undefined,
       bio: bio || undefined,
-      social_url: social_url || undefined,
-      photo_r2_key: photoKey,
       year: parseInt(year),
       set_time: set_time || undefined,
     });
@@ -181,8 +154,8 @@ export async function DELETE(request: NextRequest) {
     // Check authentication
     await requireAuth();
 
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const body = await request.json();
+    const { id } = body;
 
     if (!id) {
       return NextResponse.json(

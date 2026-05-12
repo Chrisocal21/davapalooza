@@ -18,8 +18,8 @@ export default function DonatePage() {
             </h3>
             <p className="text-text text-lg leading-relaxed">
               Davapalooza is a free community event made possible by donations from neighbors like you. 
-              Your support helps us pay for stages, sound equipment, artist fees, permits, and all the 
-              little things that make this block party special.
+              Your support helps us maintain equipment, keep the block beautiful, provide food and 
+              hydration, ensure safety and security, and fund next year&apos;s event.
             </p>
           </div>
 
@@ -29,15 +29,15 @@ export default function DonatePage() {
               <ul className="space-y-2 text-text">
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
-                  <span>Sound equipment and stage rentals</span>
+                  <span>Equipment and stage maintenance</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
-                  <span>Artist performance fees</span>
+                  <span>Food and hydration for artists, staff, volunteers, and guests (limited)</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
-                  <span>Event permits and insurance</span>
+                  <span>Keeping the block clean and beautiful</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
@@ -45,7 +45,7 @@ export default function DonatePage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-primary mt-1">•</span>
-                  <span>Community beautification and cleanup</span>
+                  <span>Help fund next year&apos;s event</span>
                 </li>
               </ul>
             </div>

@@ -6,6 +6,7 @@ import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
+import ImageViewer from '@/components/ui/ImageViewer'
 
 export default function QueuePage({ params }: { params: Promise<{ type: string }> }) {
   const { type } = use(params)
@@ -13,6 +14,8 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
   const [submissions, setSubmissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [viewerOpen, setViewerOpen] = useState(false)
+  const [viewerIndex, setViewerIndex] = useState(0)
   
   const title = queueType === 'looks-good' ? 'Looks Good' : 'Needs Review'
   const subtitle = queueType === 'looks-good' ? 'Auto-triaged submissions' : 'Flagged for attention'
@@ -69,6 +72,11 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
     }
   }
 
+  const openViewer = (index: number) => {
+    setViewerIndex(index)
+    setViewerOpen(true)
+  }
+
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-7xl mx-auto">
@@ -94,10 +102,13 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {submissions.map((submission) => (
+            {submissions.map((submission, index) => (
               <Card key={submission.id} className="overflow-hidden">
                 {/* Image Preview */}
-                <div className="aspect-square bg-surface border-b border-border overflow-hidden">
+                <div 
+                  className="aspect-square bg-surface border-b border-border overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => openViewer(index)}
+                >
                   {submission.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img 
@@ -163,6 +174,20 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
               </Card>
             ))}
           </div>
+        )}
+
+        {/* Image Viewer */}
+        {viewerOpen && submissions.length > 0 && (
+          <ImageViewer
+            images={submissions.map(s => ({
+              id: s.id,
+              url: s.imageUrl,
+              handle: s.handle,
+              caption: s.caption,
+            }))}
+            initialIndex={viewerIndex}
+            onClose={() => setViewerOpen(false)}
+          />
         )}
       </div>
     </div>
