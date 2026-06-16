@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
+import { getPublicUrl } from '@/lib/r2'
 
 interface NewsPost {
   id: string;
   title: string;
   body: string;
+  photo_r2_key: string | null;
   published_at: string;
 }
 
@@ -58,6 +60,16 @@ export default function NewsPage() {
                 <h2 className="text-3xl font-display text-primary mb-4">
                   {post.title}
                 </h2>
+                {post.photo_r2_key && (
+                  <div className="mb-6">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={getPublicUrl(post.photo_r2_key)} 
+                      alt={post.title}
+                      className="w-full rounded-lg"
+                    />
+                  </div>
+                )}
                 <p className="text-text text-lg leading-relaxed whitespace-pre-wrap">
                   {post.body}
                 </p>

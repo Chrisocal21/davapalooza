@@ -28,11 +28,13 @@ export async function POST(request: NextRequest) {
     // Check authentication
     await requireAuth();
 
-    const body = await request.json();
-    const { title, body: postBody } = body;
+    const formData = await request.formData();
+    const title = formData.get('title') as string;
+    const body = formData.get('body') as string;
+    const photo = formData.get('photo') as File | null;
 
     // Validate required fields
-    if (!title || !postBody) {
+    if (!title || !body) {
       return NextResponse.json(
         { error: 'Title and body are required' },
         { status: 400 }
@@ -40,12 +42,31 @@ export async function POST(request: NextRequest) {
     }
 
     const newsId = crypto.randomUUID();
+    let photoKey: string | undefined;
+
+    // Upload photo if provided
+    if (photo && photo.size > 0) {
+      if (!isValidImageType(photo.type)) {
+        return NextResponse.json(
+          { error: 'Invalid file type' },
+          { status: 400 }
+        );
+      }
+
+      const arrayBuffer = await photo.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const fileExtension = getFileExtension(photo.name);
+      
+      photoKey = R2_PATHS.news(newsId, fileExtension);
+      await uploadToR2(photoKey, buffer, photo.type);
+    }
 
     const db = getDB();
     await newsQueries.create(db, {
       id: newsId,
       title,
-      body: postBody,
+      body: body,
+      photo_r2_key: photoKey,
     });
 
     return NextResponse.json({

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { getPublicUrl } from '@/lib/r2'
 
 interface NewsPost {
   id: string;
@@ -22,6 +23,10 @@ export default function AdminNewsPage() {
     title: '',
     body: '',
   })
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [dragOver, setDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetchPosts()
@@ -41,15 +46,40 @@ export default function AdminNewsPage() {
     }
   }
 
+  const processFile = (file: File) => {
+    setPhotoFile(file)
+    const reader = new FileReader()
+    reader.onloadend = () => setPhotoPreview(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) processFile(file)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file && file.type.startsWith('image/')) processFile(file)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log('Publishing news:', formData)
     
     try {
+      const formDataToSend = new FormData()
+      formDataToSend.append('title', formData.title)
+      formDataToSend.append('body', formData.body)
+      if (photoFile) {
+        formDataToSend.append('photo', photoFile)
+      }
+
       const response = await fetch('/api/admin/news', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: formData.title, body: formData.body }),
+        body: formDataToSend,
       })
       
       console.log('Response status:', response.status)
@@ -60,6 +90,8 @@ export default function AdminNewsPage() {
         alert('News post created successfully!')
         setShowForm(false)
         setFormData({ title: '', body: '' })
+        setPhotoFile(null)
+        setPhotoPreview(null)
         fetchPosts()
       } else {
         alert('Failed to create post: ' + (data.error || 'Unknown error'))
@@ -121,6 +153,46 @@ export default function AdminNewsPage() {
                   required
                 />
               </div>
+
+              {/* Photo Upload */}
+              <div>
+                <label className="block text-text text-sm mb-2">Photo (Optional)</label>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  className={`relative cursor-pointer rounded-xl border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center text-center p-6
+                    ${dragOver ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50 hover:bg-surface/50'}
+                    ${photoPreview ? 'p-0 border-solid border-border overflow-hidden' : ''}`}
+                >
+                  {photoPreview ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={photoPreview} alt="Preview" className="w-full max-h-80 object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <p className="text-white font-mono text-sm">Click to change photo</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-10 h-10 text-muted mb-2" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                      </svg>
+                      <p className="text-text text-sm mb-1">Drop photo here or click to browse</p>
+                      <p className="text-muted text-xs font-mono">JPG, PNG · Max 10MB</p>
+                    </>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg"
+                  onChange={handlePhotoChange}
+                  className="hidden"
+                />
+              </div>
+
               <div>
                 <label className="block text-text text-sm mb-2">Body *</label>
                 <textarea
@@ -135,6 +207,7 @@ export default function AdminNewsPage() {
             </form>
           </Card>
         )}
+
 
         {/* News List */}
         {loading ? (
@@ -155,6 +228,16 @@ export default function AdminNewsPage() {
                       {new Date(post.published_at).toLocaleDateString()}
                     </p>
                     <h4 className="text-2xl font-display text-primary mb-3">{post.title}</h4>
+                    {post.photo_r2_key && (
+                      <div className="mb-4">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                          src={getPublicUrl(post.photo_r2_key)} 
+                          alt={post.title}
+                          className="w-full max-w-2xl rounded-lg"
+                        />
+                      </div>
+                    )}
                     <p className="text-text whitespace-pre-wrap">{post.body}</p>
                   </div>
                   <div className="flex gap-2 ml-4">
