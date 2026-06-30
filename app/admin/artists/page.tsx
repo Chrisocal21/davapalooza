@@ -162,7 +162,9 @@ export default function AdminArtistsPage() {
                       )}
                       <div className="min-w-0">
                         <h4 className="text-2xl font-display text-primary">{artist.name}</h4>
-                        <p className="text-muted font-mono text-sm">{artist.genre || '—'} · {artist.year}{artist.set_time ? ` · ${artist.set_time}` : ''}</p>
+                        <p className="text-muted font-mono text-sm">
+                          {[artist.genre, artist.year, artist.set_time].filter(Boolean).join(' · ')}
+                        </p>
                         {artist.bio && <p className="text-text text-sm mt-1 line-clamp-2">{artist.bio}</p>}
                         <div className="flex flex-wrap gap-3 mt-2">
                           {artist.instagram && <span className="text-xs font-mono text-primary">IG: @{artist.instagram}</span>}
