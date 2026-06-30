@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS gallery (
   caption TEXT,
   watermarked_r2_key TEXT NOT NULL,
   approved_at TEXT NOT NULL,
+  trashed_at TEXT,
   sort_order INTEGER DEFAULT 0,
   FOREIGN KEY (submission_id) REFERENCES submissions(id)
 );

@@ -59,6 +59,16 @@ export default function ArtistsPage() {
           subtitle="The talent bringing Davapalooza to life"
         />
 
+        {/* Lineup Poster */}
+        <div className="mt-8 mb-12">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src="/flyers/DAVAPALOOZA26.jpg" 
+            alt="Davapalooza 2026 Lineup" 
+            className="w-full max-w-2xl mx-auto rounded-lg shadow-2xl"
+          />
+        </div>
+
         {/* Current Year */}
         <div className="mt-12">
           <div className="flex items-center gap-3 mb-6">
