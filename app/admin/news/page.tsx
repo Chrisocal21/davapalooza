@@ -47,10 +47,23 @@ export default function AdminNewsPage() {
   }
 
   const processFile = (file: File) => {
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif', 'application/pdf']
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      alert('Invalid file type. Please upload JPG, PNG, or PDF.')
+      return
+    }
+
     setPhotoFile(file)
-    const reader = new FileReader()
-    reader.onloadend = () => setPhotoPreview(reader.result as string)
-    reader.readAsDataURL(file)
+    
+    // Only show preview for images, not PDFs
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onloadend = () => setPhotoPreview(reader.result as string)
+      reader.readAsDataURL(file)
+    } else if (file.type === 'application/pdf') {
+      setPhotoPreview('PDF')
+    }
   }
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +75,7 @@ export default function AdminNewsPage() {
     e.preventDefault()
     setDragOver(false)
     const file = e.dataTransfer.files?.[0]
-    if (file && file.type.startsWith('image/')) processFile(file)
+    if (file) processFile(file)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -168,11 +181,34 @@ export default function AdminNewsPage() {
                 >
                   {photoPreview ? (
                     <>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={photoPreview} alt="Preview" className="w-full max-h-80 object-cover" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <p className="text-white font-mono text-sm">Click to change photo</p>
-                      </div>
+                      {photoPreview === 'PDF' ? (
+                        <div className="w-full p-8 bg-surface/50 flex flex-col items-center justify-center">
+                          <svg className="w-16 h-16 text-primary mb-3" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                            <path d="M14 2v6h6"/>
+                            <path d="M9 13h6"/>
+                            <path d="M9 17h6"/>
+                            <path d="M9 9h1"/>
+                          </svg>
+                          <p className="text-text font-mono text-sm mb-1">{photoFile?.name}</p>
+                          <p className="text-muted text-xs">PDF file attached</p>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setPhotoFile(null); setPhotoPreview(null) }}
+                            className="mt-3 text-xs text-danger hover:underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={photoPreview} alt="Preview" className="w-full max-h-80 object-cover" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <p className="text-white font-mono text-sm">Click to change photo</p>
+                          </div>
+                        </>
+                      )}
                     </>
                   ) : (
                     <>
