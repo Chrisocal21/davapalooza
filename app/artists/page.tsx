@@ -34,8 +34,22 @@ export default function ArtistsPage() {
       });
   }, []);
 
-  const currentYearArtists = artists.filter(a => a.year === 2026);
-  const pastYearsArtists = artists.filter(a => a.year < 2026);
+  // Sort artists by set_time (convert to 24hr for proper sorting)
+  const sortByTime = (a: Artist, b: Artist) => {
+    if (!a.set_time) return 1;
+    if (!b.set_time) return -1;
+    // Simple time comparison - assumes format like "7:00pm" or "1:00pm"
+    const timeA = a.set_time.toLowerCase();
+    const timeB = b.set_time.toLowerCase();
+    return timeA.localeCompare(timeB);
+  };
+
+  const currentYearArtists = artists
+    .filter(a => a.year === 2026)
+    .sort(sortByTime);
+  const pastYearsArtists = artists
+    .filter(a => a.year < 2026)
+    .sort(sortByTime);
 
   return (
     <div className="min-h-screen py-12 px-4">
@@ -60,49 +74,54 @@ export default function ArtistsPage() {
               <p className="text-muted text-lg">Lineup coming soon! Stay tuned for artist announcements.</p>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="space-y-4">
               {currentYearArtists.map((artist, i) => (
-                <Card key={artist.id} className="relative overflow-hidden flex flex-col">
-                  {/* Artist photo or placeholder */}
-                  {artist.photoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={artist.photoUrl} alt={artist.name} className="w-full aspect-square object-cover object-top" />
-                  ) : (
-                    <div className="w-full aspect-square bg-surface flex items-center justify-center">
-                      <span className="font-display text-7xl text-border select-none">
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="p-5 flex flex-col flex-1">
-                    <h4 className="text-2xl font-display text-primary mb-0.5 leading-tight">
-                      {artist.name}
-                    </h4>
-                    {artist.genre && (
-                      <p className="text-secondary text-xs font-mono tracking-widest uppercase mb-3">
-                        {artist.genre}
-                      </p>
+                <Card key={artist.id} className="relative overflow-hidden">
+                  <div className="flex gap-4 p-5">
+                    {/* Small artist photo or placeholder */}
+                    {artist.photoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={artist.photoUrl} alt={artist.name} className="w-20 h-20 rounded-lg object-cover object-top flex-shrink-0" />
+                    ) : (
+                      <div className="w-20 h-20 rounded-lg bg-surface flex items-center justify-center flex-shrink-0">
+                        <span className="font-display text-2xl text-border select-none">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                      </div>
                     )}
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <h4 className="text-2xl font-display text-primary mb-0.5 leading-tight">
+                          {artist.name}
+                        </h4>
+                        {artist.genre && (
+                          <p className="text-secondary text-xs font-mono tracking-widest uppercase mb-2">
+                            {artist.genre}
+                          </p>
+                        )}
+                      </div>
+                      {/* Set time - prominently displayed */}
+                      {artist.set_time && (
+                        <div className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-md flex-shrink-0">
+                          <svg className="w-3.5 h-3.5 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M13 7h-2v5.414l3.293 3.293 1.414-1.414L13 11.586z"/>
+                          </svg>
+                          <p className="text-primary text-sm font-mono font-semibold">{artist.set_time}</p>
+                        </div>
+                      )}
+                    </div>
+                    
                     {artist.bio && (
-                      <p className="text-muted text-sm mb-4 leading-relaxed flex-1">
+                      <p className="text-muted text-sm mb-3 leading-relaxed line-clamp-2">
                         {artist.bio}
                       </p>
                     )}
 
-                    {/* Set time */}
-                    {artist.set_time && (
-                      <div className="flex items-center gap-2 mb-4 pt-3 border-t border-border">
-                        <svg className="w-3 h-3 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M13 7h-2v5.414l3.293 3.293 1.414-1.414L13 11.586z"/>
-                        </svg>
-                        <p className="text-primary text-xs font-mono">{artist.set_time}</p>
-                      </div>
-                    )}
-
                     {/* Social links */}
                     {(artist.instagram || artist.tiktok || artist.spotify || artist.website) && (
-                      <div className="flex flex-wrap gap-2 mt-auto pt-3 border-t border-border">
+                      <div className="flex flex-wrap gap-2">
                         {artist.instagram && (
                           <a href={`https://instagram.com/${artist.instagram}`} target="_blank" rel="noopener noreferrer"
                             className="flex items-center gap-1 text-xs font-mono text-muted hover:text-primary transition-colors">
@@ -133,6 +152,7 @@ export default function ArtistsPage() {
                         )}
                       </div>
                     )}
+                  </div>
                   </div>
                 </Card>
               ))}
