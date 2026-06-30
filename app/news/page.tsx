@@ -62,12 +62,22 @@ export default function NewsPage() {
                 </h2>
                 {post.photo_r2_key && (
                   <div className="mb-6">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={getPublicUrl(post.photo_r2_key)} 
-                      alt={post.title}
-                      className="w-full rounded-lg"
-                    />
+                    {post.photo_r2_key.toLowerCase().endsWith('.pdf') ? (
+                      <div className="w-full">
+                        <iframe
+                          src={getPublicUrl(post.photo_r2_key)}
+                          className="w-full h-[1000px] border border-border rounded-lg"
+                          title={post.title}
+                        />
+                      </div>
+                    ) : (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img 
+                        src={getPublicUrl(post.photo_r2_key)} 
+                        alt={post.title}
+                        className="w-full rounded-lg"
+                      />
+                    )}
                   </div>
                 )}
                 <p className="text-text text-lg leading-relaxed whitespace-pre-wrap">

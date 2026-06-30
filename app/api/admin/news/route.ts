@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getDB, newsQueries } from '@/lib/db';
-import { uploadToR2, R2_PATHS, getFileExtension, isValidImageType } from '@/lib/r2';
+import { uploadToR2, R2_PATHS, getFileExtension, isValidNewsFileType } from '@/lib/r2';
 
 // GET - Fetch all news posts
 export async function GET(request: NextRequest) {
@@ -44,11 +44,11 @@ export async function POST(request: NextRequest) {
     const newsId = crypto.randomUUID();
     let photoKey: string | undefined;
 
-    // Upload photo if provided
+    // Upload photo/PDF if provided
     if (photo && photo.size > 0) {
-      if (!isValidImageType(photo.type)) {
+      if (!isValidNewsFileType(photo.type)) {
         return NextResponse.json(
-          { error: 'Invalid file type' },
+          { error: 'Invalid file type. Only images (JPG, PNG) and PDFs are allowed.' },
           { status: 400 }
         );
       }
@@ -114,11 +114,11 @@ export async function PUT(request: NextRequest) {
     if (title) updateData.title = title;
     if (body) updateData.body = body;
 
-    // Upload new photo if provided
+    // Upload new photo/PDF if provided
     if (photo && photo.size > 0) {
-      if (!isValidImageType(photo.type)) {
+      if (!isValidNewsFileType(photo.type)) {
         return NextResponse.json(
-          { error: 'Invalid file type' },
+          { error: 'Invalid file type. Only images (JPG, PNG) and PDFs are allowed.' },
           { status: 400 }
         );
       }

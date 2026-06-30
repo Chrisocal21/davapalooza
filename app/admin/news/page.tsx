@@ -154,9 +154,9 @@ export default function AdminNewsPage() {
                 />
               </div>
 
-              {/* Photo Upload */}
+              {/* Photo/PDF Upload */}
               <div>
-                <label className="block text-text text-sm mb-2">Photo (Optional)</label>
+                <label className="block text-text text-sm mb-2">Photo or PDF (Optional)</label>
                 <div
                   onClick={() => fileInputRef.current?.click()}
                   onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
@@ -179,15 +179,15 @@ export default function AdminNewsPage() {
                       <svg className="w-10 h-10 text-muted mb-2" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                       </svg>
-                      <p className="text-text text-sm mb-1">Drop photo here or click to browse</p>
-                      <p className="text-muted text-xs font-mono">JPG, PNG · Max 10MB</p>
+                      <p className="text-text text-sm mb-1">Drop file here or click to browse</p>
+                      <p className="text-muted text-xs font-mono">JPG, PNG, PDF · Max 10MB</p>
                     </>
                   )}
                 </div>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/jpg"
+                  accept="image/jpeg,image/png,image/jpg,application/pdf"
                   onChange={handlePhotoChange}
                   className="hidden"
                 />
@@ -230,12 +230,22 @@ export default function AdminNewsPage() {
                     <h4 className="text-2xl font-display text-primary mb-3">{post.title}</h4>
                     {post.photo_r2_key && (
                       <div className="mb-4">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
-                          src={getPublicUrl(post.photo_r2_key)} 
-                          alt={post.title}
-                          className="w-full max-w-2xl rounded-lg"
-                        />
+                        {post.photo_r2_key.toLowerCase().endsWith('.pdf') ? (
+                          <div className="w-full">
+                            <iframe
+                              src={getPublicUrl(post.photo_r2_key)}
+                              className="w-full h-[800px] border border-border rounded-lg"
+                              title={post.title}
+                            />
+                          </div>
+                        ) : (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img 
+                            src={getPublicUrl(post.photo_r2_key)} 
+                            alt={post.title}
+                            className="w-full max-w-2xl rounded-lg"
+                          />
+                        )}
                       </div>
                     )}
                     <p className="text-text whitespace-pre-wrap">{post.body}</p>

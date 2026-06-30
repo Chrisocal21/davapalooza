@@ -79,6 +79,17 @@ export function isValidImageType(contentType: string): boolean {
   return validTypes.includes(contentType.toLowerCase());
 }
 
+// Validate file type for news (images and PDFs)
+export function isValidNewsFileType(contentType: string): boolean {
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif', 'application/pdf'];
+  return validTypes.includes(contentType.toLowerCase());
+}
+
+// Check if content type is a PDF
+export function isPDF(contentType: string): boolean {
+  return contentType.toLowerCase() === 'application/pdf';
+}
+
 // Validate file size (max 10MB)
 export function isValidFileSize(size: number): boolean {
   const maxSize = 10 * 1024 * 1024; // 10MB in bytes
