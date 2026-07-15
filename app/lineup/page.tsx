@@ -55,15 +55,15 @@ export default function LineupPage() {
                   <div className="space-y-3 text-text">
                     <div>
                       <span className="text-muted font-mono text-sm">Date:</span>
-                      <p className="text-lg">TBA 2026</p>
+                      <p className="text-lg">Saturday, July 25th, 2026</p>
                     </div>
                     <div>
                       <span className="text-muted font-mono text-sm">Location:</span>
-                      <p className="text-lg">The Block, Davao City</p>
+                      <p className="text-lg">Griffin St. Oceanside</p>
                     </div>
                     <div>
                       <span className="text-muted font-mono text-sm">Time:</span>
-                      <p className="text-lg">All Day Event</p>
+                      <p className="text-lg">12 Noon Start • Bands Start at 1</p>
                     </div>
                   </div>
                 </Card>
