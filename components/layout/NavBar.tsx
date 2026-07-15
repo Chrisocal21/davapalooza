@@ -9,6 +9,7 @@ export default function NavBar() {
   const pathname = usePathname()
 
   const navLinks = [
+    { href: '/lineup', label: 'Lineup' },
     { href: '/gallery', label: 'Gallery' },
     { href: '/artists', label: 'Artists' },
     { href: '/news', label: 'News' },
