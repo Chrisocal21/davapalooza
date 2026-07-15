@@ -50,7 +50,7 @@ export default function Footer() {
             <h4 className="font-display text-xl text-text mb-3">Connect</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-muted hover:text-primary transition-colors">
+                <a href="https://www.instagram.com/southoblockparty" target="_blank" rel="noopener noreferrer" className="text-muted hover:text-primary transition-colors">
                   Instagram
                 </a>
               </li>
