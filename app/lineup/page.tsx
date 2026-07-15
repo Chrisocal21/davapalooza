@@ -36,7 +36,7 @@ export default function LineupPage() {
               <Card className="overflow-hidden cursor-pointer group" onClick={() => setLightboxOpen(true)}>
                 <div className="relative bg-surface">
                   <img
-                    src="/flyers/DAVAPALOOZA26.jpg"
+                    src="/flyers/DAVAPALOOZA26.jpg?v=2"
                     alt="DAVAPALOOZA 2026 Flyer"
                     className="w-full h-auto"
                   />
@@ -127,7 +127,7 @@ export default function LineupPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <img
-              src="/flyers/DAVAPALOOZA26.jpg"
+              src="/flyers/DAVAPALOOZA26.jpg?v=2"
               alt="DAVAPALOOZA 2026 Flyer - Full Size"
               className="w-full h-full object-contain"
             />
