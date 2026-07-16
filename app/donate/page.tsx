@@ -59,9 +59,6 @@ export default function DonatePage() {
             <a href="https://cash.app/$motodave66" target="_blank" rel="noopener noreferrer">
               <Button variant="primary" size="lg">Donate via Cash App</Button>
             </a>
-            <a href="https://venmo.com" target="_blank" rel="noopener noreferrer">
-              <Button variant="secondary" size="lg">Donate via Venmo</Button>
-            </a>
           </div>
 
           {/* Where it goes */}
