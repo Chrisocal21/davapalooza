@@ -56,11 +56,11 @@ export default function DonatePage() {
 
           {/* Donate buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
-            <a href="https://venmo.com" target="_blank" rel="noopener noreferrer">
-              <Button variant="primary" size="lg">Donate via Venmo</Button>
+            <a href="https://cash.app/$motodave66" target="_blank" rel="noopener noreferrer">
+              <Button variant="primary" size="lg">Donate via Cash App</Button>
             </a>
-            <a href="https://cash.app" target="_blank" rel="noopener noreferrer">
-              <Button variant="secondary" size="lg">Donate via Cash App</Button>
+            <a href="https://venmo.com" target="_blank" rel="noopener noreferrer">
+              <Button variant="secondary" size="lg">Donate via Venmo</Button>
             </a>
           </div>
 
