@@ -83,6 +83,14 @@ export default function ShareButton({ url, text = 'Check out Davapalooza! #South
     setMenuOpen(false);
   };
 
+  const handleInstagram = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+    setMenuOpen(false);
+  };
+
   const ShareIcon = () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -112,7 +120,10 @@ export default function ShareButton({ url, text = 'Check out Davapalooza! #South
 
       {/* Dropdown (desktop fallback) */}
       {menuOpen && (
-        <div className="absolute bottom-full mb-2 right-0 bg-surface border border-border rounded-lg shadow-xl shadow-black/50 w-44 z-50 overflow-hidden">
+        <div className="absolute bottom-full mb-2 right-0 bg-surface border border-border rounded-lg shadow-xl shadow-black/50 w-52 z-50 overflow-hidden">
+          <div className="px-4 py-2 text-[11px] uppercase tracking-[0.24em] text-muted border-b border-border">
+            Share to
+          </div>
           {shareLinks.map((link) => (
             <a
               key={link.label}
@@ -127,6 +138,16 @@ export default function ShareButton({ url, text = 'Check out Davapalooza! #South
             </a>
           ))}
           <button
+            type="button"
+            onClick={handleInstagram}
+            className="flex items-center gap-3 px-4 py-3 text-sm text-text hover:bg-white/5 hover:text-[#E1306C] transition-colors w-full border-t border-border"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7.75 2h8.5A5.75 5.75 0 0122 7.75v8.5A5.75 5.75 0 0116.25 22h-8.5A5.75 5.75 0 012 16.25v-8.5A5.75 5.75 0 017.75 2zm0 1.5A4.25 4.25 0 003.5 7.75v8.5A4.25 4.25 0 007.75 20.5h8.5A4.25 4.25 0 0020.5 16.25v-8.5A4.25 4.25 0 0016.25 3.5h-8.5zm4.25 2.5a5.75 5.75 0 110 11.5 5.75 5.75 0 010-11.5zm0 1.5a4.25 4.25 0 100 8.5 4.25 4.25 0 000-8.5zm5.5-.75a1.25 1.25 0 110 2.5 1.25 1.25 0 010-2.5z" />
+            </svg>
+            Copy link + open Instagram
+          </button>
+          <button
             onClick={handleCopy}
             className="flex items-center gap-3 px-4 py-3 text-sm text-text hover:bg-white/5 hover:text-primary transition-colors w-full border-t border-border"
           >
@@ -135,6 +156,9 @@ export default function ShareButton({ url, text = 'Check out Davapalooza! #South
             </svg>
             {copied ? 'Copied!' : 'Copy Link'}
           </button>
+          <p className="px-4 py-3 text-xs text-muted border-t border-border">
+            Tip: copy the link to paste into Instagram stories or posts.
+          </p>
         </div>
       )}
     </div>

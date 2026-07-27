@@ -96,19 +96,17 @@ export default async function NewsPostPage({ params }: { params: Promise<{ id: s
           {post.photo_r2_key && (
             <div className="mb-6">
               {post.photo_r2_key.toLowerCase().endsWith('.pdf') ? (
-                <div className="w-full">
-                  <iframe
-                    src={getPublicUrl(post.photo_r2_key)}
-                    className="w-full h-[1000px] border border-border rounded-lg"
-                    title={post.title}
-                  />
-                </div>
+                <iframe
+                  src={getPublicUrl(post.photo_r2_key)}
+                  className="w-full min-h-[500px] max-h-[70vh] rounded-lg border border-border"
+                  title={post.title}
+                />
               ) : (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={getPublicUrl(post.photo_r2_key)}
                   alt={post.title}
-                  className="w-full rounded-lg"
+                  className="w-full max-h-[70vh] object-contain rounded-lg"
                 />
               )}
             </div>
@@ -122,7 +120,6 @@ export default async function NewsPostPage({ params }: { params: Promise<{ id: s
               text={`Check out this Davapalooza update: ${post.title}`}
               variant="button"
             />
-            <p className="text-muted text-sm">Share this post</p>
           </div>
         </Card>
       </div>

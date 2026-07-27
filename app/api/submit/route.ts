@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     // Parse form data
     const formData = await request.formData();
     
-    const file = formData.get('photo') as File;
+    const file = formData.get('photo');
     const handle = formData.get('handle') as string;
     const platform = formData.get('platform') as string;
     const caption = formData.get('caption') as string;
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const agreement = formData.get('agreement') as string;
 
     // Validate required fields
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json(
         { error: 'Photo is required' },
         { status: 400 }
@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert file to buffer
+    // Convert file to Uint8Array for edge compatibility
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const uint8Array = new Uint8Array(arrayBuffer);
 
     // Generate unique submission ID
     const submissionId = crypto.randomUUID();
@@ -67,11 +67,11 @@ export async function POST(request: NextRequest) {
 
     // Upload original file to R2
     const r2Key = R2_PATHS.submissions.pending(submissionId, fileExtension);
-    await uploadToR2(r2Key, buffer, file.type);
+    await uploadToR2(r2Key, uint8Array, file.type);
 
     // Run moderation checks
     const textResult = checkSubmissionText(handle, caption);
-    const imageResult = await scanImage(buffer);
+    const imageResult = await scanImage(uint8Array);
 
     // Determine queue based on moderation results
     let queue: 'looks_good' | 'needs_review';

@@ -63,21 +63,19 @@ export default function NewsPage() {
                   {post.title}
                 </h2>
                 {post.photo_r2_key && (
-                  <div className="mb-6">
+                  <div className="mb-6 overflow-hidden rounded-lg border border-border">
                     {post.photo_r2_key.toLowerCase().endsWith('.pdf') ? (
-                      <div className="w-full">
-                        <iframe
-                          src={getPublicUrl(post.photo_r2_key)}
-                          className="w-full h-[1000px] border border-border rounded-lg"
-                          title={post.title}
-                        />
-                      </div>
+                      <iframe
+                        src={getPublicUrl(post.photo_r2_key)}
+                        className="w-full min-h-[500px] max-h-[70vh] rounded-lg"
+                        title={post.title}
+                      />
                     ) : (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img 
-                        src={getPublicUrl(post.photo_r2_key)} 
+                      <img
+                        src={getPublicUrl(post.photo_r2_key)}
                         alt={post.title}
-                        className="w-full rounded-lg"
+                        className="w-full max-h-[70vh] object-contain rounded-lg"
                       />
                     )}
                   </div>
@@ -89,13 +87,12 @@ export default function NewsPage() {
                   <Link href={`/news/${post.id}`} className="text-sm font-medium text-primary hover:underline">
                     Read post
                   </Link>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center">
                     <ShareButton
                       url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://davapalooza.com'}/news/${post.id}`}
                       text={`Check out this Davapalooza update: ${post.title}`}
                       variant="button"
                     />
-                    <p className="text-muted text-sm">Share this post</p>
                   </div>
                 </div>
               </Card>

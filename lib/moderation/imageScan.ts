@@ -10,10 +10,35 @@ function getOpenAIClient() {
   });
 }
 
-export async function scanImage(imageBuffer: Buffer): Promise<'pass' | 'flag' | 'error'> {
+function toBase64(input: Buffer | Uint8Array | ArrayBuffer): string {
+  if (typeof Buffer !== 'undefined' && input instanceof Buffer) {
+    return input.toString('base64');
+  }
+
+  if (input instanceof Uint8Array) {
+    let binary = '';
+    for (let i = 0; i < input.length; i += 1) {
+      binary += String.fromCharCode(input[i]);
+    }
+    return globalThis.btoa(binary);
+  }
+
+  if (input instanceof ArrayBuffer) {
+    const bytes = new Uint8Array(input);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += 1) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return globalThis.btoa(binary);
+  }
+
+  throw new Error('Unsupported image buffer type');
+}
+
+export async function scanImage(imageBuffer: Buffer | Uint8Array | ArrayBuffer): Promise<'pass' | 'flag' | 'error'> {
   try {
     // Convert buffer to base64
-    const base64Image = imageBuffer.toString('base64');
+    const base64Image = toBase64(imageBuffer);
     const dataUrl = `data:image/jpeg;base64,${base64Image}`;
 
     // Get OpenAI client
