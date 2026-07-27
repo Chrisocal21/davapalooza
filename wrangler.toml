@@ -4,10 +4,21 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = false
 
-routes = [
-  { pattern = "davapalooza.com/*", zone_name = "davapalooza.com" },
-  { pattern = "www.davapalooza.com/*", zone_name = "davapalooza.com" },
-]
+[[routes]]
+pattern = "davapalooza.com/*"
+zone_name = "davapalooza.com"
+
+[[routes]]
+pattern = "www.davapalooza.com/*"
+zone_name = "davapalooza.com"
+
+[[routes]]
+pattern = "southoblockparty.com/*"
+zone_name = "southoblockparty.com"
+
+[[routes]]
+pattern = "www.southoblockparty.com/*"
+zone_name = "southoblockparty.com"
 
 [assets]
 directory = ".open-next/assets"
