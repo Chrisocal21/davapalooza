@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
+import ShareButton from '@/components/ui/ShareButton'
 import { getPublicUrl } from '@/lib/r2'
 
 interface NewsPost {
@@ -83,6 +85,19 @@ export default function NewsPage() {
                 <p className="text-text text-lg leading-relaxed whitespace-pre-wrap">
                   {post.body}
                 </p>
+                <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <Link href={`/news/${post.id}`} className="text-sm font-medium text-primary hover:underline">
+                    Read post
+                  </Link>
+                  <div className="flex items-center gap-4">
+                    <ShareButton
+                      url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://davapalooza.com'}/news/${post.id}`}
+                      text={`Check out this Davapalooza update: ${post.title}`}
+                      variant="button"
+                    />
+                    <p className="text-muted text-sm">Share this post</p>
+                  </div>
+                </div>
               </Card>
             ))
           )}
