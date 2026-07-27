@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: '%s | Davapalooza',
   },
   description: 'Free community block party on Griffin St, Oceanside CA — July 25, 2026. Live music, photos, and good vibes.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://southoblockparty.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://davapalooza.com'),
   openGraph: {
     type: 'website',
     siteName: 'Davapalooza',
