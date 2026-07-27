@@ -7,6 +7,13 @@ import { uploadToR2, R2_PATHS, isValidImageType, isValidFileSize, getFileExtensi
 import { checkSubmissionText } from '@/lib/moderation/textFilter';
 import { scanImage } from '@/lib/moderation/imageScan';
 
+async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+  ]);
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Parse form data
@@ -71,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Run moderation checks
     const textResult = checkSubmissionText(handle, caption);
-    const imageResult = await scanImage(uint8Array);
+    const imageResult = await withTimeout(scanImage(uint8Array), 10000, 'error' as const);
 
     // Determine queue based on moderation results
     let queue: 'looks_good' | 'needs_review';
