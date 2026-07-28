@@ -100,11 +100,14 @@ export default function Home() {
           <p className="text-sm font-mono text-primary tracking-widest uppercase mb-6 opacity-80">
             Griffin St · Oceanside, CA
           </p>
-          <h1 className="text-6xl md:text-[10rem] font-display text-primary leading-none mb-2 drop-shadow-lg whitespace-nowrap">
+          <h1 className="text-6xl md:text-[10rem] font-display text-primary leading-none mb-6 drop-shadow-lg whitespace-nowrap">
             DAVAPALOOZA
           </h1>
-          <p className="text-xl md:text-2xl text-muted mb-10 font-mono">
-            #SouthOBlockParty · July 25, 2026
+          <p className="text-xl md:text-2xl text-muted mb-6 font-mono">
+            #southoblockparty · #davapalooza
+          </p>
+          <p className="text-3xl md:text-5xl font-display text-muted mb-6 tracking-wide">
+            July 25, 2026
           </p>
 
           {/* Countdown */}

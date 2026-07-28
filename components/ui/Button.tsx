@@ -13,14 +13,13 @@ export default function Button({
   className = '',
   ...props 
 }: ButtonProps) {
-  const baseStyles = 'font-sans font-medium rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed'
+  const baseStyles = 'font-sans font-bold rounded-lg transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed'
   
   const variantStyles = {
-    primary: 'bg-primary text-bg hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25 uppercase tracking-wider',
-
-    secondary: 'bg-secondary text-text hover:bg-secondary/90 hover:shadow-lg hover:shadow-secondary/20',
-    ghost: 'bg-transparent border border-border text-text hover:bg-surface hover:border-primary',
-    danger: 'bg-danger text-text hover:bg-danger/90 hover:shadow-lg hover:shadow-danger/20',
+    primary:   'bg-sunset text-cream hover:opacity-90 hover:shadow-lg hover:shadow-sun-red/30 uppercase tracking-wider',
+    secondary: 'bg-secondary text-ink hover:opacity-90 hover:shadow-lg hover:shadow-sun-yellow/30 uppercase tracking-wider',
+    ghost:     'bg-transparent border-2 border-ink text-ink hover:bg-ink hover:text-cream',
+    danger:    'bg-danger text-cream hover:opacity-90 hover:shadow-lg hover:shadow-danger/30',
   }
   
   const sizeStyles = {

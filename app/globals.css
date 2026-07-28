@@ -1,20 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=League+Spartan:wght@300;400;500;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --color-bg: #0e0e0e;
-  --color-surface: #1a1a1a;
-  --color-primary: #16a1cf;
-  --color-secondary: #e84c2b;
-  --color-text: #f0ede6;
-  --color-muted: #7a7672;
-  --color-border: #2e2e2e;
-  --color-success: #4caf7d;
-  --color-warning: #16a1cf;
-  --color-danger: #e84c2b;
+  /* ── Brand palette ── */
+  --color-sky:          #45BEE4;
+  --color-ink:          #272B2C;
+  --color-cream:        #FDF0DA;
+  --color-sun-yellow:   #EFB936;
+  --color-sun-orange:   #E78B39;
+  --color-sun-red:      #D62D38;
+  --color-sun-red-deep: #E23548;
+
+  /* ── Semantic tokens ── */
+  --color-bg:       #45BEE4;
+  --color-surface:  #FDF0DA;
+  --color-primary:  #D62D38;
+  --color-secondary:#EFB936;
+  --color-text:     #272B2C;
+  --color-muted:    #4A5A62;
+  --color-border:   #B0C4CA;
+  --color-success:  #4caf7d;
+  --color-warning:  #EFB936;
+  --color-danger:   #E23548;
+
+  /* ── Sunset gradient ── */
+  --sunset: linear-gradient(135deg, #EFB936 0%, #E78B39 33%, #D62D38 66%, #E23548 100%);
+  --sunset-h: linear-gradient(to right,  #EFB936 0%, #E78B39 33%, #D62D38 66%, #E23548 100%);
+  --sunset-v: linear-gradient(to bottom, #EFB936 0%, #E78B39 33%, #D62D38 66%, #E23548 100%);
 }
 
 * {
@@ -32,17 +47,30 @@ body {
 body {
   color: var(--color-text);
   background: var(--color-bg);
-  background-image: radial-gradient(ellipse at 50% 0%, rgba(22, 161, 207, 0.06) 0%, transparent 55%);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'League Spartan', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Global grain texture overlay ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+  animation: grain 8s steps(1) infinite;
+  z-index: 9999;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--color-bg); }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+::-webkit-scrollbar-track { background: var(--color-sky); }
+::-webkit-scrollbar-thumb { background: var(--color-ink); border-radius: 3px; opacity: 0.4; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-sun-red); }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Bebas Neue', sans-serif;
@@ -77,17 +105,15 @@ a {
 .animate-fade-up { animation: fadeUp 0.6s ease-out forwards; }
 .animate-pulse-slow { animation: pulse-slow 6s ease-in-out infinite; }
 
-/* Grain overlay */
-.grain::after {
+/* Legacy per-element grain class — kept for opt-in use on specific sections */
+.grain { position: relative; }
+.grain::before {
   content: '';
   position: absolute;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-  opacity: 0.035;
+  opacity: 0.08;
   pointer-events: none;
-  animation: grain 8s steps(1) infinite;
   z-index: 1;
 }
 
@@ -110,7 +136,7 @@ a {
 
 .gallery-tile:hover {
   transform: scale(1.02);
-  box-shadow: 0 8px 28px rgba(22, 161, 207, 0.2);
+  box-shadow: 0 8px 28px rgba(214, 45, 56, 0.2);
 }
 
 /* Button transitions */
@@ -124,7 +150,7 @@ button {
     -45deg,
     transparent,
     transparent 12px,
-    rgba(255,255,255,0.012) 12px,
-    rgba(255,255,255,0.012) 13px
+    rgba(39,43,44,0.03) 12px,
+    rgba(39,43,44,0.03) 13px
   );
 }

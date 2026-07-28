@@ -9,9 +9,9 @@ interface BadgeProps {
 export default function Badge({ children, variant = 'pending', className = '' }: BadgeProps) {
   const variantStyles = {
     approved: 'bg-success/20 text-success border-success',
-    pending: 'bg-warning/20 text-warning border-warning',
-    flagged: 'bg-danger/20 text-danger border-danger',
-    rejected: 'bg-muted/20 text-muted border-muted',
+    pending:  'bg-sun-orange/20 text-sun-orange border-sun-orange',
+    flagged:  'bg-danger/20 text-danger border-danger',
+    rejected: 'bg-ink/10 text-muted border-muted',
   }
   
   return (

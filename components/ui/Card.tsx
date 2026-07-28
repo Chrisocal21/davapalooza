@@ -7,7 +7,7 @@ interface CardProps {
 }
 
 export default function Card({ children, className = '', onClick }: CardProps) {
-  const clickableClass = onClick ? 'cursor-pointer hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10 transition-all' : 'hover:border-border/60'
+  const clickableClass = onClick ? 'cursor-pointer hover:border-primary hover:shadow-lg hover:shadow-sun-red/10 transition-all' : 'hover:border-border/60'
   
   return (
     <div 

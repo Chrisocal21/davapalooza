@@ -6,6 +6,20 @@ import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 
+interface QueueStats {
+  looksGood: number
+  needsReview: number
+  totalApproved: number
+  totalRejected: number
+  totalPending: number
+  totalSubmissions: number
+}
+
+interface IntakeCounts {
+  bands: number
+  vendors: number
+}
+
 interface RecentActivity {
   id: string;
   handle: string;
@@ -15,7 +29,7 @@ interface RecentActivity {
 }
 
 export default function AdminDashboard() {
-  const [queueStats, setQueueStats] = useState({
+  const [queueStats, setQueueStats] = useState<QueueStats>({
     looksGood: 0,
     needsReview: 0,
     totalApproved: 0,
@@ -24,10 +38,12 @@ export default function AdminDashboard() {
     totalSubmissions: 0,
   })
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
+  const [intakeCounts, setIntakeCounts] = useState<IntakeCounts>({ bands: 0, vendors: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchStats()
+    fetchIntakeCounts()
   }, [])
 
   const fetchStats = async () => {
@@ -51,19 +67,42 @@ export default function AdminDashboard() {
       setLoading(false)
     }
   }
+
+  const fetchIntakeCounts = async () => {
+    try {
+      const [bandsRes, vendorsRes] = await Promise.all([
+        fetch('/api/admin/bands?status=new'),
+        fetch('/api/admin/vendors?status=new'),
+      ])
+      const [bandsData, vendorsData] = await Promise.all([
+        bandsRes.ok ? bandsRes.json() : { inquiries: [] },
+        vendorsRes.ok ? vendorsRes.json() : { registrations: [] },
+      ])
+      setIntakeCounts({
+        bands: (bandsData.inquiries || []).length,
+        vendors: (vendorsData.registrations || []).length,
+      })
+    } catch {
+      // non-critical
+    }
+  }
+
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-7xl mx-auto">
+
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-10">
           <SectionHeader title="Admin Dashboard" subtitle="Moderation & Management" align="left" />
-          <Link href="/" className="text-muted hover:text-primary transition-colors">
+          <Link href="/" className="text-muted hover:text-primary transition-colors text-sm">
             ← Back to Site
           </Link>
         </div>
 
-        {/* Queue Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        {/* ── Photo Moderation ── */}
+        <SectionLabel>Photo Moderation</SectionLabel>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Link href="/admin/queue/looks-good">
             <Card className="p-8 hover:border-success transition-all cursor-pointer">
               <div className="flex items-start justify-between mb-4">
@@ -91,37 +130,62 @@ export default function AdminDashboard() {
           </Link>
         </div>
 
-        {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <Card className="p-6 text-center">
-            <p className="text-3xl font-display text-primary mb-2">
-              {queueStats.totalApproved}
-            </p>
+            <p className="text-3xl font-display text-primary mb-2">{queueStats.totalApproved}</p>
             <p className="text-muted text-sm">Total Approved</p>
           </Card>
           <Card className="p-6 text-center">
-            <p className="text-3xl font-display text-danger mb-2">
-              {queueStats.totalRejected}
-            </p>
+            <p className="text-3xl font-display text-danger mb-2">{queueStats.totalRejected}</p>
             <p className="text-muted text-sm">Total Rejected</p>
           </Card>
           <Card className="p-6 text-center">
-            <p className="text-3xl font-display text-text mb-2">
-              {queueStats.totalPending}
-            </p>
+            <p className="text-3xl font-display text-text mb-2">{queueStats.totalPending}</p>
             <p className="text-muted text-sm">Pending</p>
           </Card>
           <Card className="p-6 text-center">
-            <p className="text-3xl font-display text-text mb-2">
-              {queueStats.totalSubmissions}
-            </p>
+            <p className="text-3xl font-display text-text mb-2">{queueStats.totalSubmissions}</p>
             <p className="text-muted text-sm">Total Submissions</p>
           </Card>
         </div>
 
-        {/* Recent Activity */}
+        {/* ── Intakes ── */}
+        <SectionLabel>Intakes</SectionLabel>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <Link href="/admin/bands">
+            <Card className="p-6 hover:border-primary transition-all cursor-pointer">
+              <div className="flex items-start justify-between mb-3">
+                <h4 className="text-xl font-display text-text">Band Inquiries</h4>
+                {intakeCounts.bands > 0 && (
+                  <Badge variant="pending">{intakeCounts.bands} new</Badge>
+                )}
+              </div>
+              <p className="text-muted text-sm">Artist interest form submissions</p>
+            </Card>
+          </Link>
+
+          <Link href="/admin/vendors">
+            <Card className="p-6 hover:border-primary transition-all cursor-pointer">
+              <div className="flex items-start justify-between mb-3">
+                <h4 className="text-xl font-display text-text">Vendor Registrations</h4>
+                {intakeCounts.vendors > 0 && (
+                  <Badge variant="pending">{intakeCounts.vendors} new</Badge>
+                )}
+              </div>
+              <p className="text-muted text-sm">Market stall &amp; vendor sign-ups</p>
+            </Card>
+          </Link>
+
+          <ComingSoonCard title="Volunteer Sign-ups" description="Day-of volunteer roster" />
+          <ComingSoonCard title="Sponsor Inquiries" description="Paying / backing sponsor tier" />
+          <ComingSoonCard title="Supporters" description="Photographer &amp; videographer interest" />
+        </div>
+
+        {/* ── Recent Photo Activity ── */}
+        <SectionLabel>Recent Photo Activity</SectionLabel>
+
         <Card className="p-6 mb-12">
-          <h3 className="text-2xl font-display text-text mb-6">Recent Activity</h3>
           {recentActivity.length === 0 ? (
             <p className="text-muted text-center py-8">No recent activity</p>
           ) : (
@@ -151,8 +215,10 @@ export default function AdminDashboard() {
           )}
         </Card>
 
-        {/* Quick Links */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        {/* ── Content Management ── */}
+        <SectionLabel>Content Management</SectionLabel>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link href="/admin/gallery">
             <Card className="p-6 hover:border-primary transition-all cursor-pointer">
               <h4 className="text-xl font-display text-text mb-2">Gallery</h4>
@@ -172,7 +238,28 @@ export default function AdminDashboard() {
             </Card>
           </Link>
         </div>
+
       </div>
     </div>
+  )
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-mono text-muted uppercase tracking-widest mb-4 mt-2">
+      {children}
+    </p>
+  )
+}
+
+function ComingSoonCard({ title, description }: { title: string; description: string }) {
+  return (
+    <Card className="p-6 opacity-50 cursor-not-allowed select-none">
+      <div className="flex items-start justify-between mb-3">
+        <h4 className="text-xl font-display text-text">{title}</h4>
+        <span className="text-xs font-mono text-muted border border-border rounded px-2 py-0.5">soon</span>
+      </div>
+      <p className="text-muted text-sm">{description}</p>
+    </Card>
   )
 }

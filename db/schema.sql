@@ -70,6 +70,81 @@ CREATE TABLE IF NOT EXISTS store_emails (
   captured_at TEXT NOT NULL
 );
 
+-- Band/artist interest form
+CREATE TABLE IF NOT EXISTS band_inquiries (
+  id TEXT PRIMARY KEY,
+  band_name TEXT NOT NULL,
+  contact_name TEXT NOT NULL,
+  contact_email TEXT NOT NULL,
+  contact_phone TEXT,
+  genres TEXT,
+  instagram TEXT,
+  tiktok TEXT,
+  spotify TEXT,
+  website TEXT,
+  other_info TEXT,
+  submitted_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new',
+  admin_notes TEXT
+);
+
+-- Vendor / market stall registration
+CREATE TABLE IF NOT EXISTS vendor_registrations (
+  id TEXT PRIMARY KEY,
+  business_name TEXT NOT NULL,
+  contact_name TEXT NOT NULL,
+  contact_email TEXT NOT NULL,
+  contact_phone TEXT,
+  product_description TEXT NOT NULL,
+  space_needs TEXT,
+  submitted_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new',
+  admin_notes TEXT
+);
+
+-- Volunteer sign-ups
+CREATE TABLE IF NOT EXISTS volunteers (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  availability TEXT,
+  skills TEXT,
+  other_info TEXT,
+  submitted_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new',
+  admin_notes TEXT
+);
+
+-- Sponsor inquiries
+CREATE TABLE IF NOT EXISTS sponsor_inquiries (
+  id TEXT PRIMARY KEY,
+  company_name TEXT NOT NULL,
+  contact_name TEXT NOT NULL,
+  contact_email TEXT NOT NULL,
+  contact_phone TEXT,
+  interest_level TEXT,
+  message TEXT,
+  submitted_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new',
+  admin_notes TEXT
+);
+
+-- Supporter submissions (photographers / videographers)
+CREATE TABLE IF NOT EXISTS supporter_submissions (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  role TEXT NOT NULL,
+  instagram TEXT,
+  website TEXT,
+  portfolio_url TEXT,
+  other_info TEXT,
+  submitted_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new',
+  admin_notes TEXT
+);
+
 -- Create indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_queue ON submissions(queue);
@@ -79,3 +154,11 @@ CREATE INDEX IF NOT EXISTS idx_gallery_sort_order ON gallery(sort_order);
 CREATE INDEX IF NOT EXISTS idx_artists_year ON artists(year);
 CREATE INDEX IF NOT EXISTS idx_artists_sort_order ON artists(sort_order);
 CREATE INDEX IF NOT EXISTS idx_news_published_at ON news(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_band_inquiries_status ON band_inquiries(status);
+CREATE INDEX IF NOT EXISTS idx_band_inquiries_submitted_at ON band_inquiries(submitted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_vendor_registrations_status ON vendor_registrations(status);
+CREATE INDEX IF NOT EXISTS idx_vendor_registrations_submitted_at ON vendor_registrations(submitted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_volunteers_status ON volunteers(status);
+CREATE INDEX IF NOT EXISTS idx_volunteers_submitted_at ON volunteers(submitted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sponsor_inquiries_status ON sponsor_inquiries(status);
+CREATE INDEX IF NOT EXISTS idx_supporter_submissions_status ON supporter_submissions(status);

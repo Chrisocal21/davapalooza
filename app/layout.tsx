@@ -5,22 +5,22 @@ import Footer from '@/components/layout/Footer'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Davapalooza | South O Block Party',
-    template: '%s | Davapalooza',
+    default: 'South O Block Party',
+    template: '%s | South O Block Party',
   },
-  description: 'Free community block party on Griffin St, Oceanside CA — July 25, 2026. Live music, photos, and good vibes.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://davapalooza.com'),
+  description: 'Free community block party on Griffin St, Oceanside CA. Live Music. Good People. Strong Community.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://southoblockparty.com'),
   openGraph: {
     type: 'website',
-    siteName: 'Davapalooza',
-    title: 'Davapalooza | South O Block Party',
-    description: 'Free community block party on Griffin St, Oceanside CA — July 25, 2026.',
+    siteName: 'South O Block Party',
+    title: 'South O Block Party',
+    description: 'Free community block party on Griffin St, Oceanside CA. Live Music. Good People. Strong Community.',
     url: '/',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Davapalooza | South O Block Party',
-    description: 'Free community block party on Griffin St, Oceanside CA — July 25, 2026.',
+    title: 'South O Block Party',
+    description: 'Free community block party on Griffin St, Oceanside CA. Live Music. Good People. Strong Community.',
   },
 }
 
