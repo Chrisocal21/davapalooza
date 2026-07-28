@@ -31,6 +31,7 @@ export interface GalleryPhoto {
   approved_at: string;
   sort_order: number;
   trashed_at: string | null;
+  year: number | null;
 }
 
 export interface Artist {
@@ -293,6 +294,13 @@ export const galleryQueries = {
     await db
       .prepare('DELETE FROM gallery WHERE id = ?')
       .bind(id)
+      .run();
+  },
+
+  async setYear(db: D1Database, id: string, year: number | null): Promise<void> {
+    await db
+      .prepare('UPDATE gallery SET year = ? WHERE id = ?')
+      .bind(year, id)
       .run();
   },
 };

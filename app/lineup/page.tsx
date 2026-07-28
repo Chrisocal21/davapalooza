@@ -216,7 +216,7 @@ function PastEventSection({
           {isMostRecent && <Badge variant="approved">Most Recent</Badge>}
         </div>
         <span className="text-muted text-xs font-mono group-hover:text-primary transition-colors uppercase tracking-wider">
-          {open ? 'â–² collapse' : 'â–¼ expand'}
+          {open ? '▲ collapse' : '▼ expand'}
         </span>
       </button>
 

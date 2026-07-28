@@ -21,7 +21,21 @@ interface Artist {
   photoUrl?: string | null;
 }
 
-const EMPTY_FORM = { name: '', genre: '', bio: '', year: '2026', setTime: '', instagram: '', tiktok: '', spotify: '', website: '' }
+const EMPTY_FORM = { name: '', genre: '', bio: '', year: new Date().getFullYear().toString(), setTime: '', instagram: '', tiktok: '', spotify: '', website: '' }
+
+/** Convert "1:00 PM", "3pm", "12 Noon" → minutes since midnight for sorting */
+function parseTime(t: string | null | undefined): number {
+  if (!t) return 9999
+  const s = t.trim().toLowerCase().replace('noon', '12:00 pm').replace('midnight', '12:00 am')
+  const match = s.match(/(\d+)(?::(\d+))?\s*(am|pm)?/)
+  if (!match) return 9999
+  let h = parseInt(match[1])
+  const min = parseInt(match[2] || '0')
+  const ampm = match[3]
+  if (ampm === 'pm' && h !== 12) h += 12
+  if (ampm === 'am' && h === 12) h = 0
+  return h * 60 + min
+}
 
 const inputCls = 'w-full px-3 py-2 bg-bg border border-border rounded-lg text-text text-sm focus:outline-none focus:border-primary'
 const labelCls = 'block text-muted text-xs font-mono mb-1'
@@ -130,9 +144,21 @@ export default function AdminArtistsPage() {
           <div className="space-y-4">{[1,2,3].map(i => <div key={i} className="h-28 bg-surface rounded-xl animate-pulse" />)}</div>
         ) : artists.length === 0 ? (
           <Card className="p-12 text-center"><p className="text-muted">No artists yet.</p></Card>
-        ) : (
-          <div className="space-y-4">
-            {artists.map(artist => (
+        ) : (() => {
+          const byYear = artists.reduce<Record<number, Artist[]>>((acc, a) => { (acc[a.year] ??= []).push(a); return acc }, {})
+          const years = Object.keys(byYear).map(Number).sort((a, b) => b - a)
+          return (
+            <div className="space-y-10">
+              {years.map(year => {
+                const sorted = [...byYear[year]].sort((a, b) => parseTime(a.set_time) - parseTime(b.set_time))
+                return (
+                  <div key={year}>
+                    <div className="flex items-center gap-3 mb-3 pb-2 border-b border-border">
+                      <h3 className="text-3xl font-display text-ink">{year}</h3>
+                      <span className="text-muted font-mono text-xs">{sorted.length} artist{sorted.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="space-y-3">
+                      {sorted.map(artist => (
               <Card key={artist.id} className="p-6">
                 {editingId === artist.id ? (
                   <div className="space-y-4">
@@ -163,7 +189,7 @@ export default function AdminArtistsPage() {
                       <div className="min-w-0">
                         <h4 className="text-2xl font-display text-primary">{artist.name}</h4>
                         <p className="text-muted font-mono text-sm">
-                          {[artist.genre, artist.year, artist.set_time].filter(Boolean).join(' · ')}
+                          {[artist.genre, artist.set_time].filter(Boolean).join(' · ')}
                         </p>
                         {artist.bio && <p className="text-text text-sm mt-1 line-clamp-2">{artist.bio}</p>}
                         <div className="flex flex-wrap gap-3 mt-2">
@@ -181,9 +207,14 @@ export default function AdminArtistsPage() {
                   </div>
                 )}
               </Card>
-            ))}
-          </div>
-        )}
+              ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()}
       </div>
     </div>
   )

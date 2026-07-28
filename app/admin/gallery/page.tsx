@@ -15,7 +15,10 @@ interface GalleryPhoto {
   watermarked_r2_key: string;
   approved_at: string;
   imageUrl: string;
+  year: number | null;
 }
+
+const YEARS = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i)
 
 export default function AdminGalleryPage() {
   const [photos, setPhotos] = useState<GalleryPhoto[]>([])
@@ -95,6 +98,15 @@ export default function AdminGalleryPage() {
     setViewerOpen(true)
   }
 
+  const handleSetYear = async (id: string, year: number | null) => {
+    await fetch('/api/admin/gallery', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, year }),
+    })
+    fetchPhotos()
+  }
+
   const displayPhotos = showTrash ? trashedPhotos : photos
 
   return (
@@ -171,8 +183,21 @@ export default function AdminGalleryPage() {
                     <p className="font-mono text-sm text-primary">{photo.handle}</p>
                     {photo.caption && <p className="text-text text-sm mt-1">{photo.caption}</p>}
                   </div>
-                  <div className="text-muted text-xs font-mono">
+                  <div className="text-muted text-xs font-mono space-y-1">
                     <p>Approved: {new Date(photo.approved_at).toLocaleDateString()}</p>
+                    {!showTrash && (
+                      <div className="flex items-center gap-2 pt-1">
+                        <label className="text-muted text-xs">Year:</label>
+                        <select
+                          value={photo.year ?? ''}
+                          onChange={e => handleSetYear(photo.id, e.target.value ? parseInt(e.target.value) : null)}
+                          className="flex-1 text-xs font-mono bg-bg border border-border rounded px-2 py-1 text-text focus:outline-none focus:border-primary"
+                        >
+                          <option value="">— untagged —</option>
+                          {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                      </div>
+                    )}
                   </div>
                   {showTrash ? (
                     <Button 
