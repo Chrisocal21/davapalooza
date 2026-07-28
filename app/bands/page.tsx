@@ -201,6 +201,7 @@ export default function BandsPage() {
                   placeholder="Tell us about your band — your sound, your story, what makes you Davapalooza material. This becomes your public profile if you're selected."
                   className={inputCls}
                 />
+              </div>
             </div>
 
             {error && <p className="text-danger text-sm">{error}</p>}
