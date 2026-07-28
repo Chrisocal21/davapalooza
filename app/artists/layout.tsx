@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Artist Lineup',
-  description: 'Meet the artists performing at Davapalooza 2026.',
+  title: 'The Legends — Davapalooza',
+  description: 'Every act that has ever graced the Davapalooza stage.',
 }
 
 export default function ArtistsLayout({ children }: { children: React.ReactNode }) {

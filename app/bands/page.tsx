@@ -189,15 +189,18 @@ export default function BandsPage() {
             </div>
 
             {/* Other info */}
-            <div>
-              <label className={labelCls}>Anything else we should know?</label>
-              <textarea
-                value={form.other_info}
-                onChange={e => set('other_info', e.target.value)}
-                rows={4}
-                placeholder="Set length, special needs, past performances..."
-                className={inputCls}
-              />
+            <div className="pt-4 border-t border-border">
+              <p className="text-xs font-mono text-muted uppercase tracking-wider mb-4">About Your Band</p>
+              <div>
+                <label className={labelCls}>Band Bio *</label>
+                <textarea
+                  value={form.other_info}
+                  onChange={e => set('other_info', e.target.value)}
+                  rows={5}
+                  required
+                  placeholder="Tell us about your band — your sound, your story, what makes you Davapalooza material. This becomes your public profile if you're selected."
+                  className={inputCls}
+                />
             </div>
 
             {error && <p className="text-danger text-sm">{error}</p>}

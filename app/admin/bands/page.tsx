@@ -34,12 +34,18 @@ const STATUS_COLORS: Record<string, 'approved' | 'flagged' | 'pending'> = {
 
 const STATUSES = ['new', 'reviewed', 'accepted', 'declined', 'archived']
 
+const PROMOTE_DEFAULT = { year: new Date().getFullYear().toString(), set_time: '', bio: '' }
+
 export default function AdminBandsPage() {
   const [inquiries, setInquiries] = useState<BandInquiry[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState<string | null>(null)
+  const [promotingId, setPromotingId] = useState<string | null>(null)
+  const [promoteForm, setPromoteForm] = useState(PROMOTE_DEFAULT)
+  const [promoteStatus, setPromoteStatus] = useState<Record<string, 'success' | 'error'>>({})
+  const [promoting, setPromoting] = useState(false)
 
   useEffect(() => { fetchInquiries() }, [])
 
@@ -63,6 +69,46 @@ export default function AdminBandsPage() {
       })
       setInquiries(prev => prev.map(i => i.id === id ? { ...i, status } : i))
     } finally { setSaving(null) }
+  }
+
+  const handlePromote = async (inquiry: BandInquiry) => {
+    setPromoting(true)
+    try {
+      const res = await fetch('/api/admin/artists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: inquiry.band_name,
+          genre: inquiry.genres || '',
+          bio: promoteForm.bio || inquiry.other_info || '',
+          year: parseInt(promoteForm.year),
+          set_time: promoteForm.set_time || '',
+          instagram: inquiry.instagram || '',
+          tiktok: inquiry.tiktok || '',
+          spotify: inquiry.spotify || '',
+          website: inquiry.website || '',
+        }),
+      })
+      if (res.ok) {
+        setPromoteStatus(prev => ({ ...prev, [inquiry.id]: 'success' }))
+        setPromotingId(null)
+        // Auto-set status to accepted
+        if (inquiry.status !== 'accepted') {
+          await fetch('/api/admin/bands', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: inquiry.id, status: 'accepted' }),
+          })
+          setInquiries(prev => prev.map(i => i.id === inquiry.id ? { ...i, status: 'accepted' } : i))
+        }
+      } else {
+        setPromoteStatus(prev => ({ ...prev, [inquiry.id]: 'error' }))
+      }
+    } catch {
+      setPromoteStatus(prev => ({ ...prev, [inquiry.id]: 'error' }))
+    } finally {
+      setPromoting(false)
+    }
   }
 
   const saveNotes = async (id: string) => {
@@ -190,6 +236,87 @@ export default function AdminBandsPage() {
                         >
                           {saving === inquiry.id ? 'Saving...' : 'Save Notes'}
                         </Button>
+                      </div>
+
+                      {/* Add to Lineup */}
+                      <div className="border-t-2 border-primary/30 pt-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-xs font-mono text-primary uppercase tracking-wider font-semibold">
+                            ⚡ Add to Artist Lineup
+                          </p>
+                          {promoteStatus[inquiry.id] === 'success' && (
+                            <span className="text-xs font-mono text-success">Profile created!</span>
+                          )}
+                          {promoteStatus[inquiry.id] === 'error' && (
+                            <span className="text-xs font-mono text-danger">Failed — try again</span>
+                          )}
+                        </div>
+                        {promotingId !== inquiry.id ? (
+                          <Button
+                            onClick={() => {
+                              setPromoteForm({ ...PROMOTE_DEFAULT, bio: inquiry.other_info || '' })
+                              setPromotingId(inquiry.id)
+                            }}
+                            variant="secondary"
+                            size="sm"
+                          >
+                            {promoteStatus[inquiry.id] === 'success' ? 'Add Again' : 'Create Artist Profile'}
+                          </Button>
+                        ) : (
+                          <div className="space-y-3 bg-surface/20 rounded-lg p-4 border border-border">
+                            <p className="text-xs text-muted font-mono">
+                              This will create a profile for <strong className="text-text">{inquiry.band_name}</strong> with their inquiry data pre-filled.
+                            </p>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-xs font-mono text-muted mb-1">Year *</label>
+                                <input
+                                  type="number"
+                                  value={promoteForm.year}
+                                  onChange={e => setPromoteForm(f => ({ ...f, year: e.target.value }))}
+                                  className="w-full px-3 py-2 bg-bg border border-border rounded text-text text-sm focus:outline-none focus:border-primary"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-mono text-muted mb-1">Set Time</label>
+                                <input
+                                  type="text"
+                                  value={promoteForm.set_time}
+                                  onChange={e => setPromoteForm(f => ({ ...f, set_time: e.target.value }))}
+                                  placeholder="e.g. 2:30 PM"
+                                  className="w-full px-3 py-2 bg-bg border border-border rounded text-text text-sm focus:outline-none focus:border-primary"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-mono text-muted mb-1">Bio (for public profile)</label>
+                              <textarea
+                                value={promoteForm.bio}
+                                onChange={e => setPromoteForm(f => ({ ...f, bio: e.target.value }))}
+                                rows={3}
+                                placeholder="Band bio for the public showcase..."
+                                className="w-full px-3 py-2 bg-bg border border-border rounded text-text text-sm focus:outline-none focus:border-primary resize-none"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={() => handlePromote(inquiry)}
+                                disabled={promoting || !promoteForm.year}
+                                variant="primary"
+                                size="sm"
+                              >
+                                {promoting ? 'Creating...' : 'Confirm — Add to Lineup'}
+                              </Button>
+                              <Button
+                                onClick={() => setPromotingId(null)}
+                                variant="secondary"
+                                size="sm"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
