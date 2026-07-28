@@ -76,6 +76,23 @@ export default function AboutPage() {
             </p>
           </div>
 
+          <div>
+            <h3 className="font-display text-3xl text-ink mb-3">The people behind it</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
+              {[
+                { name: 'Dave', role: 'Co-Founder', title: 'Executive Producer' },
+                { name: 'Steve', role: 'Co-Founder', title: 'Talent & Production Director' },
+                { name: 'Chris', role: 'Co-Founder', title: 'Technical Director' },
+              ].map(person => (
+                <Card key={person.name} className="p-5">
+                  <p className="font-display text-2xl text-primary mb-1">{person.name}</p>
+                  <p className="text-xs font-mono text-muted uppercase tracking-widest mb-0.5">{person.role}</p>
+                  <p className="text-sm text-text">{person.title}</p>
+                </Card>
+              ))}
+            </div>
+          </div>
+
           {/* CTA row */}
           <div className="pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm font-sans font-semibold">
             <Link href="/lineup" className="text-primary hover:underline">

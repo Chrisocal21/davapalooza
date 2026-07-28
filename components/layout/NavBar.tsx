@@ -13,7 +13,6 @@ export default function NavBar() {
     { href: '/gallery', label: 'Gallery' },
     { href: '/news', label: 'News' },
     { href: '/about', label: 'About' },
-    { href: '/donate', label: 'Donate' },
     { href: '/submit', label: 'Submit Photos' },
   ]
 
