@@ -22,44 +22,12 @@ function photoYear(p: GalleryPhoto): number {
   return p.year ?? new Date(p.approved_at).getFullYear()
 }
 
-export default function GalleryPage() {
-  const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [viewerOpen, setViewerOpen] = useState(false);
-  const [viewerIndex, setViewerIndex] = useState(0);
-  const [selectedYear, setSelectedYear] = useState<number | 'all'>('all');
-
-  useEffect(() => {
-    fetch('/api/gallery')
-      .then(r => r.json())
-      .then(data => { setPhotos(data.photos || []); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
-
-  // All distinct years, most recent first
-  const years = [...new Set(photos.map(photoYear))].sort((a, b) => b - a)
-
-  const filtered = selectedYear === 'all' ? photos : photos.filter(p => photoYear(p) === selectedYear)
-
-  // For "all" view, group by year descending
-  const byYear = filtered.reduce<Record<number, GalleryPhoto[]>>((acc, p) => {
-    const y = photoYear(p)
-    ;(acc[y] ??= []).push(p)
-    return acc
-  }, {})
-  const groupedYears = Object.keys(byYear).map(Number).sort((a, b) => b - a)
-
-  // Flat index for viewer (preserves click-to-open position)
-  const openViewer = (photo: GalleryPhoto) => {
-    setViewerIndex(filtered.findIndex(p => p.id === photo.id))
-    setViewerOpen(true)
-  }
-
-  const PhotoCard = ({ photo }: { photo: GalleryPhoto }) => (
+function PhotoCard({ photo, onOpen }: { photo: GalleryPhoto; onOpen: () => void }) {
+  return (
     <Card className="gallery-tile break-inside-avoid overflow-hidden mb-4">
       <div
         className="bg-surface border-b border-border cursor-pointer hover:opacity-90 transition-opacity overflow-hidden"
-        onClick={() => openViewer(photo)}
+        onClick={onOpen}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -87,6 +55,40 @@ export default function GalleryPage() {
       </div>
     </Card>
   )
+}
+
+export default function GalleryPage() {
+  const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+  const [selectedYear, setSelectedYear] = useState<number | 'all'>('all');
+
+  useEffect(() => {
+    fetch('/api/gallery')
+      .then(r => r.json())
+      .then(data => { setPhotos(data.photos || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  // All distinct years, most recent first
+  const years = [...new Set(photos.map(photoYear))].sort((a, b) => b - a)
+
+  const filtered = selectedYear === 'all' ? photos : photos.filter(p => photoYear(p) === selectedYear)
+
+  // For "all" view, group by year descending
+  const byYear = filtered.reduce<Record<number, GalleryPhoto[]>>((acc, p) => {
+    const y = photoYear(p)
+    ;(acc[y] ??= []).push(p)
+    return acc
+  }, {})
+  const groupedYears = Object.keys(byYear).map(Number).sort((a, b) => b - a)
+
+  // Flat index for viewer
+  const openViewer = (photo: GalleryPhoto) => {
+    setViewerIndex(filtered.findIndex(p => p.id === photo.id))
+    setViewerOpen(true)
+  }
 
   return (
     <div className="min-h-screen py-12 px-4">
@@ -143,7 +145,7 @@ export default function GalleryPage() {
         ) : selectedYear !== 'all' ? (
           // Single year â€” flat masonry grid
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
-            {filtered.map(photo => <PhotoCard key={photo.id} photo={photo} />)}
+            {filtered.map(photo => <PhotoCard key={photo.id} photo={photo} onOpen={() => openViewer(photo)} />)}
           </div>
         ) : (
           // All years â€” grouped sections
@@ -157,7 +159,7 @@ export default function GalleryPage() {
                   </span>
                 </h2>
                 <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
-                  {byYear[year].map(photo => <PhotoCard key={photo.id} photo={photo} />)}
+                  {byYear[year].map(photo => <PhotoCard key={photo.id} photo={photo} onOpen={() => openViewer(photo)} />)}
                 </div>
               </section>
             ))}
