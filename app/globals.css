@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=League+Spartan:wght@300;400;500;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -21,8 +19,8 @@
   --color-secondary:#EFB936;
   --color-text:     #272B2C;
   --color-muted:    #4A5A62;
-  --color-border:   #B0C4CA;
-  --color-success:  #4caf7d;
+  --color-border:   #D9C7A3;
+  --color-success:  #176B43;
   --color-warning:  #EFB936;
   --color-danger:   #E23548;
 
@@ -30,127 +28,355 @@
   --sunset: linear-gradient(135deg, #EFB936 0%, #E78B39 33%, #D62D38 66%, #E23548 100%);
   --sunset-h: linear-gradient(to right,  #EFB936 0%, #E78B39 33%, #D62D38 66%, #E23548 100%);
   --sunset-v: linear-gradient(to bottom, #EFB936 0%, #E78B39 33%, #D62D38 66%, #E23548 100%);
+
+  /* Height of the sticky nav, including its sunset stripe. Anchors and
+     full-height sections offset by this so nothing hides under the bar. */
+  --nav-h: 4.3125rem;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+@layer base {
+  html {
+    scroll-padding-top: calc(var(--nav-h) + 1rem);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    overflow-x: clip; /* clip keeps position: sticky working; hidden is the fallback */
+  }
+
+  body {
+    color: var(--color-text);
+    background: var(--color-bg);
+    font-family: var(--font-sans), 'League Spartan', system-ui, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display), 'Bebas Neue', Impact, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    background: var(--color-sun-yellow);
+    color: var(--color-ink);
+  }
+
+  /* One focus treatment everywhere: a yellow band inside an ink outline, so
+     at least one of the two shows on sky, cream and ink alike. Keyboard only. */
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--color-sun-yellow);
+  }
+  :focus:not(:focus-visible) { outline: none; }
+
+  button {
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease,
+      opacity 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--color-cream); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ink);
+    border: 2px solid var(--color-cream);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-sun-red); }
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--color-text);
-  background: var(--color-bg);
-  font-family: 'League Spartan', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ── Global grain texture overlay ── */
+/* ── Paper grain ──
+   A fixed, static noise layer over the whole page so flat colour fields read
+   as printed stock instead of screen fills. Sits under the nav and overlays. */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-  opacity: 0.04;
+  opacity: 0.055;
   pointer-events: none;
-  animation: grain 8s steps(1) infinite;
-  z-index: 9999;
+  z-index: 40;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--color-sky); }
-::-webkit-scrollbar-thumb { background: var(--color-ink); border-radius: 3px; opacity: 0.4; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-sun-red); }
+@layer components {
+  /* ── Layout ── */
+  .shell {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 640px)  { .shell { padding-inline: 2rem; } }
+  @media (min-width: 1024px) { .shell { padding-inline: 3rem; } }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Bebas Neue', sans-serif;
-  letter-spacing: 0.02em;
+  /* ── Small-caps metadata label (dates, handles, counts, section tags) ── */
+  .eyebrow {
+    font-family: var(--font-mono), 'Space Mono', ui-monospace, monospace;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* ── Long-form copy ── */
+  .prose-block > * + * { margin-top: 1.1em; }
+  .prose-block { max-width: 65ch; font-size: 1.125rem; line-height: 1.65; }
+
+  /* ── Text link with an underline that thickens on hover ── */
+  .link {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+    text-decoration-color: currentColor;
+    transition: text-decoration-color 0.15s ease, color 0.15s ease;
+  }
+  .link:hover { text-decoration-color: var(--color-sun-red); }
+
+  /* ── Form controls ── */
+  .field {
+    display: block;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 0.95rem 0.65rem;
+    background: #FFF8EA;
+    color: var(--color-ink);
+    border: 2px solid rgba(39, 43, 44, 0.28);
+    border-radius: 4px;
+    font: inherit;
+    line-height: 1.4;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    appearance: none;
+  }
+  .field::placeholder { color: rgba(74, 90, 98, 0.85); }
+  .field:hover { border-color: rgba(39, 43, 44, 0.55); }
+  .field:focus,
+  .field:focus-visible {
+    outline: none;
+    border-color: var(--color-ink);
+    background: #fff;
+    box-shadow: 0 0 0 4px var(--color-sun-yellow);
+    border-radius: 4px;
+  }
+  textarea.field { resize: vertical; min-height: 7rem; }
+  select.field {
+    padding-right: 2.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23272B2C' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    background-size: 1.1rem;
+  }
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer utilities {
+  /* ── Halftone dot field ──
+     Uses currentColor, so set a text colour on the element to pick the ink.
+     Pair with a mask (below) to fade the dots out like a printed gradient. */
+  .halftone {
+    background-image: radial-gradient(circle at center, currentColor 1.35px, transparent 1.6px);
+    background-size: 9px 9px;
+  }
+  .halftone-lg {
+    background-image: radial-gradient(circle at center, currentColor 2.2px, transparent 2.5px);
+    background-size: 14px 14px;
+  }
+  .fade-to-t  { -webkit-mask-image: linear-gradient(to top, #000, transparent);            mask-image: linear-gradient(to top, #000, transparent); }
+  .fade-to-b  { -webkit-mask-image: linear-gradient(to bottom, #000, transparent);         mask-image: linear-gradient(to bottom, #000, transparent); }
+  .fade-to-r  { -webkit-mask-image: linear-gradient(to right, #000, transparent);          mask-image: linear-gradient(to right, #000, transparent); }
+  .fade-to-l  { -webkit-mask-image: linear-gradient(to left, #000, transparent);           mask-image: linear-gradient(to left, #000, transparent); }
+  .fade-to-tr { -webkit-mask-image: linear-gradient(to top right, #000 5%, transparent 65%); mask-image: linear-gradient(to top right, #000 5%, transparent 65%); }
+  .fade-to-bl { -webkit-mask-image: linear-gradient(to bottom left, #000 5%, transparent 65%); mask-image: linear-gradient(to bottom left, #000 5%, transparent 65%); }
+
+  /* Per-section grain, for sections that want a heavier tooth than the page. */
+  .grain { position: relative; }
+  .grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Striped surface sections */
+  .stripe-bg {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 12px,
+      rgba(39,43,44,0.03) 12px,
+      rgba(39,43,44,0.03) 13px
+    );
+  }
+
+  /* Loading placeholder with a slow sheen instead of a hard pulse. */
+  .skeleton {
+    background-color: rgba(39, 43, 44, 0.08);
+    background-image: linear-gradient(100deg, transparent 30%, rgba(255, 248, 234, 0.7) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
+  }
+  .skeleton-dark {
+    background-color: rgba(253, 240, 218, 0.07);
+    background-image: linear-gradient(100deg, transparent 30%, rgba(253, 240, 218, 0.1) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
+  }
+
+  .animate-delay-100 { animation-delay: 0.1s; }
+  .animate-delay-200 { animation-delay: 0.2s; }
+  .animate-delay-300 { animation-delay: 0.3s; }
+  .animate-delay-400 { animation-delay: 0.4s; }
+  .animate-delay-500 { animation-delay: 0.5s; }
+
+  /* Kept for existing markup that still asks for these by name. */
+  .animate-fade-up { animation: rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  .pause-on-hover:hover { animation-play-state: paused; }
 }
 
-/* Animations */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
+/* ── Keyframes ──
+   Defined here rather than in tailwind.config so they exist whether or not a
+   matching animate-* utility happens to be in use. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
-@keyframes pulse-slow {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50%       { opacity: 1;   transform: scale(1.08); }
+@keyframes sun-rise {
+  from { transform: translateY(16%); }
+  to   { transform: translateY(0); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
 }
 
-@keyframes grain {
-  0%, 100% { transform: translate(0, 0); }
-  10%       { transform: translate(-2%, -3%); }
-  30%       { transform: translate(3%, 2%); }
-  50%       { transform: translate(-1%, 4%); }
-  70%       { transform: translate(4%, -2%); }
-  90%       { transform: translate(-3%, 1%); }
+/* ── Scroll reveal ──
+   Progressive enhancement: only browsers with scroll-driven animations get it,
+   and only when motion is welcome. Everywhere else the content is simply there —
+   nothing is ever hidden waiting on JavaScript. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 220px;
+    }
+    @keyframes reveal-up {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  }
 }
 
-.animate-fade-up { animation: fadeUp 0.6s ease-out forwards; }
-.animate-pulse-slow { animation: pulse-slow 6s ease-in-out infinite; }
-
-/* Legacy per-element grain class — kept for opt-in use on specific sections */
-.grain { position: relative; }
-.grain::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-  opacity: 0.08;
-  pointer-events: none;
-  z-index: 1;
+/* ── Marquee ──
+   The ticker repeats its items many times over, so their styling lives here
+   (not in per-item utility classes) and the separator is a CSS drawing of the
+   sun mark rather than an SVG — it keeps the repeated markup tiny. */
+.marquee-run {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
 }
-
-.animate-delay-100 {
-  animation-delay: 0.1s;
+.marquee-item {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-left: 1.25rem;
+  font-family: var(--font-display), 'Bebas Neue', Impact, sans-serif;
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
 }
-
-.animate-delay-200 {
-  animation-delay: 0.2s;
-}
-
-.animate-delay-300 {
-  animation-delay: 0.3s;
-}
-
-/* Gallery hover effects */
-.gallery-tile {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.gallery-tile:hover {
-  transform: scale(1.02);
-  box-shadow: 0 8px 28px rgba(214, 45, 56, 0.2);
-}
-
-/* Button transitions */
-button {
-  transition: all 0.15s ease;
-}
-
-/* Striped surface sections */
-.stripe-bg {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 12px,
-    rgba(39,43,44,0.03) 12px,
-    rgba(39,43,44,0.03) 13px
+.marquee-item > span:first-child { padding: 0.75rem 0 0.55rem; }
+.sun-dot {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  /* Same bands as components/ui/SunMark.tsx */
+  background: linear-gradient(
+    to bottom,
+    #EFB936 0 40%, transparent 40% 44%,
+    #E78B39 44% 60%, transparent 60% 65%,
+    #D62D38 65% 77.5%, transparent 77.5% 83%,
+    #E23548 83% 92%, transparent 92%
   );
+}
+@media (min-width: 640px) {
+  .marquee-item { gap: 1.75rem; padding-left: 1.75rem; font-size: 2rem; }
+  .marquee-item > span:first-child { padding: 1rem 0 0.7rem; }
+  .sun-dot { width: 1.25rem; height: 1.25rem; }
+}
+
+/* ── Torn paper edge (see components/ui/TornEdge.tsx) ──
+   A 600px tile that repeats, masked out of a solid strip. The strip overlaps
+   the neighbouring section by all but 1px so there is never a hairline gap. */
+.torn-edge {
+  --torn-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 16' preserveAspectRatio='none'%3E%3Cpath d='M0 16 L0 7 4 9 8 10.7 19 10.9 33 11.3 39 6 46 5.8 60 4.5 67 6.7 76 8.9 80 7.1 87 5.5 94 1.8 103 1.5 117 1.5 131 1.6 142 3.7 145 4.9 148 5 152 4.7 157 3.5 161 3.3 175 5.3 182 6.1 189 6.7 203 6.3 209 5.3 212 10.5 226 12 235 10.9 249 12 263 12 266 11.2 270 12 277 12 288 11.9 292 12 301 8.4 312 12 316 8 320 6.6 324 7.7 331 8.3 336 4.5 350 6.4 356 4.8 363 1.5 368 3.3 375 2.8 380 1.5 383 1.5 387 1.5 396 3.5 399 2.7 406 4.5 420 4.8 425 9.1 436 9 442 7.1 453 3.2 458 1.5 461 2.6 467 3.4 470 7.7 475 12 486 12 490 10.6 495 10.6 506 9.2 520 9.3 527 10.8 533 5.6 547 5.2 552 4.5 557 5.3 563 10.1 569 10.4 574 12 591 9.5 600 7 L600 16 Z'/%3E%3C/svg%3E");
+  position: relative;
+  z-index: 2;
+  height: 16px;
+  margin-top: -15px;
+  pointer-events: none;
+  -webkit-mask: var(--torn-tile) repeat-x left bottom / 600px 16px;
+          mask: var(--torn-tile) repeat-x left bottom / 600px 16px;
+}
+.torn-edge-flip {
+  margin-top: 0;
+  margin-bottom: -15px;
+  transform: scaleY(-1);
+}
+
+/* ── Gallery tiles ── */
+.gallery-tile {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.gallery-tile:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 0 var(--color-ink);
+}
+
+/* ── Motion off ──
+   Anything that moves on its own stops; state changes become instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

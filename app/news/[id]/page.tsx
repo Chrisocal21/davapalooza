@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import SectionHeader from '@/components/ui/SectionHeader';
-import Card from '@/components/ui/Card';
+import Icon from '@/components/ui/Icon';
+import PageHeader from '@/components/ui/PageHeader';
 import ShareButton from '@/components/ui/ShareButton';
 import { getDB, newsQueries } from '@/lib/db';
 import { getPublicUrl } from '@/lib/r2';
+import { formatPostDate, isPdf } from '@/lib/format';
 
 interface NewsPost {
   id: string;
@@ -38,11 +40,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const url = `${SITE_URL}/news/${post.id}`;
   const excerpt = getExcerpt(post.body);
-  const formattedDate = new Date(post.published_at).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
 
   return {
     title: `${post.title} | Davapalooza`,
@@ -81,48 +78,59 @@ export default async function NewsPostPage({ params }: { params: Promise<{ id: s
     notFound();
   }
 
+  const backLink = (
+    <Link href="/news" className="eyebrow inline-flex items-center gap-2 font-bold text-ink">
+      <Icon name="arrow-left" size={15} />
+      <span className="link">All news</span>
+    </Link>
+  );
+
   return (
-    <div className="min-h-screen py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <SectionHeader
-          title={post.title}
-          subtitle={new Date(post.published_at).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-        />
-        <Card className="p-8 mt-8">
-          {post.photo_r2_key && (
-            <div className="mb-6">
-              {post.photo_r2_key.toLowerCase().endsWith('.pdf') ? (
-                <iframe
-                  src={getPublicUrl(post.photo_r2_key)}
-                  className="w-full min-h-[500px] max-h-[70vh] rounded-lg border border-border"
-                  title={post.title}
-                />
-              ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={getPublicUrl(post.photo_r2_key)}
-                  alt={post.title}
-                  className="w-full max-h-[70vh] object-contain rounded-lg"
-                />
-              )}
+    <article>
+      <PageHeader
+        eyebrow={formatPostDate(post.published_at)}
+        title={post.title}
+      />
+
+      <div className="bg-cream py-12 sm:py-16">
+        <div className="shell">
+          <div className="mx-auto max-w-3xl">
+            <div className="mb-8">{backLink}</div>
+
+            {post.photo_r2_key && (
+              <div className="mb-10">
+                {isPdf(post.photo_r2_key) ? (
+                  <iframe
+                    src={getPublicUrl(post.photo_r2_key)}
+                    className="max-h-[70vh] min-h-[500px] w-full rounded border-2 border-ink bg-white shadow-print"
+                    title={post.title}
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={getPublicUrl(post.photo_r2_key)}
+                    alt={post.title}
+                    className="mx-auto max-h-[75vh] w-auto max-w-full rounded border-2 border-ink bg-white shadow-print-lg"
+                  />
+                )}
+              </div>
+            )}
+
+            <p className="whitespace-pre-wrap text-[1.1875rem] leading-[1.7] text-ink">
+              {post.body}
+            </p>
+
+            <div className="mt-12 flex flex-col gap-5 border-t-2 border-ink pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <ShareButton
+                url={`${SITE_URL}/news/${post.id}`}
+                text={`Check out this Davapalooza update: ${post.title}`}
+                variant="button"
+              />
+              {backLink}
             </div>
-          )}
-          <p className="text-text text-lg leading-relaxed whitespace-pre-wrap">
-            {post.body}
-          </p>
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <ShareButton
-              url={`${SITE_URL}/news/${post.id}`}
-              text={`Check out this Davapalooza update: ${post.title}`}
-              variant="button"
-            />
           </div>
-        </Card>
+        </div>
       </div>
-    </div>
+    </article>
   );
 }

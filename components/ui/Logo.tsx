@@ -1,42 +1,31 @@
-'use client'
-
-import { useState } from 'react'
+import SunMark from '@/components/ui/SunMark'
 
 interface LogoProps {
-  /** Extra classes applied to the img element */
+  /** Ink for light fields (sky, cream), cream for the ink field. */
+  tone?: 'ink' | 'cream'
+  size?: 'md' | 'lg'
   className?: string
-  /** Rendered height in px — width scales proportionally */
-  height?: number
 }
 
+const SIZES = {
+  md: { mark: 'h-9 w-9', name: 'text-[1.7rem]', sub: 'text-[0.6rem] tracking-[0.19em]' },
+  lg: { mark: 'h-14 w-14', name: 'text-[2.6rem]', sub: 'text-[0.72rem] tracking-[0.22em]' },
+} as const
+
 /**
- * Swappable site logo.
- * Drop /public/logo.png to replace the text fallback automatically.
+ * Site logo: sun mark + wordmark.
  * Single reference point — do not recreate logo markup elsewhere.
+ * It is drawn inline, so there is no image file to load (or to go missing).
  */
-export default function Logo({ className = '', height = 48 }: LogoProps) {
-  const [imgFailed, setImgFailed] = useState(false)
-
-  if (imgFailed) {
-    return (
-      <span
-        className={`font-display text-inherit leading-none ${className}`}
-        style={{ fontSize: height * 0.6 }}
-      >
-        SOUTH O
-      </span>
-    )
-  }
-
+export default function Logo({ tone = 'ink', size = 'md', className = '' }: LogoProps) {
+  const s = SIZES[size]
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/logo.png"
-      alt="South O Block Party"
-      height={height}
-      style={{ height, width: 'auto' }}
-      className={className}
-      onError={() => setImgFailed(true)}
-    />
+    <span className={`inline-flex items-center gap-2.5 ${tone === 'cream' ? 'text-cream' : 'text-ink'} ${className}`}>
+      <SunMark className={`${s.mark} shrink-0`} />
+      <span className="flex flex-col leading-none">
+        <span className={`font-display ${s.name} leading-[0.85] tracking-wide`}>Davapalooza</span>
+        <span className={`font-sans font-bold uppercase ${s.sub} mt-1`}>South O Block Party</span>
+      </span>
+    </span>
   )
 }

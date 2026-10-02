@@ -39,19 +39,51 @@ A community-driven event website featuring a moderated photo gallery, artist lin
 
 ## Design System
 
+A screen-printed gig poster, properly typeset: flat inks on paper, hard edges, big condensed type.
+
 ### Colors
-- **Primary:** #f5c842 (Golden Yellow)
-- **Secondary:** #e84c2b (Red-Orange)
-- **Background:** #0e0e0e (Near Black)
-- **Surface:** #1a1a1a (Card/Panel)
-- **Success:** #4caf7d (Green)
-- **Warning:** #f5a623 (Orange)
-- **Danger:** #e84c2b (Red)
+
+Tokens live in `tailwind.config.js` (and as CSS variables in `app/globals.css`).
+
+| Token | Hex | Used for |
+|---|---|---|
+| `sky` / `bg` | `#45BEE4` | The signature field — hero, page headers, nav |
+| `cream` / `surface` | `#FDF0DA` | Paper — the reading surface for page bodies and cards |
+| `ink` / `text` | `#272B2C` | All text on light fields; the dark field (lineup, footer) |
+| `sun-yellow` / `secondary` | `#EFB936` | Secondary buttons, highlights, accents on ink |
+| `sun-orange` | `#E78B39` | Sun mark, sunset stripe |
+| `sun-red` / `primary` | `#D62D38` | Primary buttons, display accents |
+| `sun-red-deep` / `danger` | `#E23548` | Sun mark, errors |
+| `paper`, `cream-deep`, `red-ink`, `ink-soft`, `sky-deep` | — | Tints and shades of the above, for depth and small text |
+
+Pairing rules (these keep everything at WCAG AA):
+
+- On **sky**: ink text only. Red, yellow and cream appear there as shapes, never as text.
+- On **cream**: ink text; `sun-red` for display-size headings; `red-ink` for small red text.
+- On **ink**: cream text; `sun-yellow` for accents.
 
 ### Typography
-- **Display:** Bebas Neue (Headers)
-- **Body:** DM Sans (Main text)
-- **Mono:** Space Mono (Metadata, handles)
+
+Loaded with `next/font` in `app/layout.tsx` (self-hosted, no runtime request to Google).
+
+- **Display:** Bebas Neue — headings, the wordmark, lineup names. Fluid sizes: `text-display-sm` → `text-display-xl`.
+- **Body:** League Spartan — copy, buttons, form labels.
+- **Mono:** Space Mono — metadata only: dates, handles, set times, counts (`.eyebrow`).
+
+### Building blocks
+
+- `components/ui/PageHeader` — the sky band at the top of every inside page (title, lede, sun, torn edge).
+- `components/ui/SectionHeader` — section title with optional eyebrow, subtitle and action.
+- `components/ui/Button` — `primary` / `secondary` / `ghost` / `paper` / `danger`. Pass `href` to render a real link; pass `onDark` on the ink field.
+- `components/ui/Card`, `Badge`, `Field` (+ `FieldGroup`, `FormError`), `FormLayout` (`FormPage`, `Steps`, `FormSuccess`).
+- `components/ui/SunMark`, `Logo`, `Marquee`, `TornEdge`, `Icon` — the brand pieces. The logo is inline SVG; there is no logo image file.
+- CSS helpers in `app/globals.css`: `.shell` (page container), `.eyebrow`, `.field`, `.link`, `.halftone`, `.skeleton`, `.reveal`.
+
+### Event dates
+
+`lib/events.ts` drives the home hero, the lineup page and the "next year" messaging. Before the event the
+hero shows a countdown; on the day it says it's happening; afterwards it points to next year. Adding next
+year's entry there is all it takes to switch the site over.
 
 ## Getting Started
 

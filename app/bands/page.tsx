@@ -1,13 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import SectionHeader from '@/components/ui/SectionHeader'
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
-
-const inputCls =
-  'w-full px-4 py-3 bg-surface border border-border rounded-lg text-text placeholder-muted focus:outline-none focus:border-primary transition-colors'
-const labelCls = 'block text-muted text-sm font-mono mb-1'
+import Field, { FieldGroup, FormError } from '@/components/ui/Field'
+import { FormPage, FormSuccess, Steps } from '@/components/ui/FormLayout'
 
 const EMPTY = {
   band_name: '',
@@ -55,163 +51,175 @@ export default function BandsPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <Card className="w-full max-w-lg p-10 text-center">
-          <p className="text-5xl mb-4">🎸</p>
-          <h2 className="text-3xl font-display text-primary mb-3">We got it!</h2>
-          <p className="text-muted">
-            Thanks for reaching out. We&apos;ll be in touch once we review your submission.
-          </p>
-        </Card>
-      </div>
+      <FormSuccess
+        icon="music"
+        title="We got it!"
+        actions={
+          <Button href="/lineup" variant="secondary">
+            See the Lineup
+          </Button>
+        }
+      >
+        Thanks for reaching out. We&apos;ll be in touch once we review your submission.
+      </FormSuccess>
     )
   }
 
   return (
-    <div className="min-h-screen py-16 px-4">
-      <div className="max-w-2xl mx-auto">
-        <SectionHeader
-          title="Play Davapalooza"
-          subtitle="Fill out the form below and we'll be in touch. All genres welcome."
-          align="left"
+    <FormPage
+      eyebrow="Band inquiry"
+      title="Play Davapalooza"
+      lede="Fill out the form below and we'll be in touch. All genres welcome."
+      aside={
+        <Steps
+          title="Good to know"
+          items={[
+            'Local and regional artists play across the day.',
+            'All genres are welcome — the lineup has always reflected what the community actually listens to.',
+            "Your bio becomes your public profile if you're selected.",
+          ]}
         />
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-7">
+        {/* Band info */}
+        <Field label="Band / Artist Name" htmlFor="band_name" required>
+          <input
+            id="band_name"
+            type="text"
+            value={form.band_name}
+            onChange={e => set('band_name', e.target.value)}
+            placeholder="The Whatever Band"
+            className="field"
+            required
+          />
+        </Field>
 
-        <Card className="p-8 mt-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Band info */}
-            <div>
-              <label className={labelCls}>Band / Artist Name *</label>
+        <Field label="Genre(s)" htmlFor="genres">
+          <input
+            id="genres"
+            type="text"
+            value={form.genres}
+            onChange={e => set('genres', e.target.value)}
+            placeholder="Hip-hop, R&B, funk..."
+            className="field"
+          />
+        </Field>
+
+        {/* Contact */}
+        <FieldGroup title="Contact Info">
+          <div className="grid grid-cols-1 gap-x-5 gap-y-6 md:grid-cols-2">
+            <Field label="Your Name" htmlFor="contact_name" required>
               <input
+                id="contact_name"
                 type="text"
-                value={form.band_name}
-                onChange={e => set('band_name', e.target.value)}
-                placeholder="The Whatever Band"
-                className={inputCls}
+                value={form.contact_name}
+                onChange={e => set('contact_name', e.target.value)}
+                placeholder="Full name"
+                autoComplete="name"
+                className="field"
                 required
               />
-            </div>
-
-            <div>
-              <label className={labelCls}>Genre(s)</label>
+            </Field>
+            <Field label="Email" htmlFor="contact_email" required>
               <input
-                type="text"
-                value={form.genres}
-                onChange={e => set('genres', e.target.value)}
-                placeholder="Hip-hop, R&B, funk..."
-                className={inputCls}
+                id="contact_email"
+                type="email"
+                value={form.contact_email}
+                onChange={e => set('contact_email', e.target.value)}
+                placeholder="you@example.com"
+                autoComplete="email"
+                className="field"
+                required
               />
-            </div>
+            </Field>
+            <Field label="Phone (optional)" htmlFor="contact_phone">
+              <input
+                id="contact_phone"
+                type="tel"
+                value={form.contact_phone}
+                onChange={e => set('contact_phone', e.target.value)}
+                placeholder="(555) 000-0000"
+                autoComplete="tel"
+                className="field"
+              />
+            </Field>
+          </div>
+        </FieldGroup>
 
-            {/* Contact */}
-            <div className="pt-4 border-t border-border">
-              <p className="text-xs font-mono text-muted uppercase tracking-wider mb-4">Contact Info</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelCls}>Your Name *</label>
-                  <input
-                    type="text"
-                    value={form.contact_name}
-                    onChange={e => set('contact_name', e.target.value)}
-                    placeholder="Full name"
-                    className={inputCls}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={labelCls}>Email *</label>
-                  <input
-                    type="email"
-                    value={form.contact_email}
-                    onChange={e => set('contact_email', e.target.value)}
-                    placeholder="you@example.com"
-                    className={inputCls}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={labelCls}>Phone (optional)</label>
-                  <input
-                    type="tel"
-                    value={form.contact_phone}
-                    onChange={e => set('contact_phone', e.target.value)}
-                    placeholder="(555) 000-0000"
-                    className={inputCls}
-                  />
-                </div>
-              </div>
-            </div>
+        {/* Socials */}
+        <FieldGroup title="Links & Socials">
+          <div className="grid grid-cols-1 gap-x-5 gap-y-6 md:grid-cols-2">
+            <Field label="Instagram (without @)" htmlFor="instagram">
+              <input
+                id="instagram"
+                type="text"
+                value={form.instagram}
+                onChange={e => set('instagram', e.target.value)}
+                placeholder="yourbandhandle"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                className="field"
+              />
+            </Field>
+            <Field label="TikTok (without @)" htmlFor="tiktok">
+              <input
+                id="tiktok"
+                type="text"
+                value={form.tiktok}
+                onChange={e => set('tiktok', e.target.value)}
+                placeholder="yourbandhandle"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                className="field"
+              />
+            </Field>
+            <Field label="Spotify Artist URL" htmlFor="spotify">
+              <input
+                id="spotify"
+                type="url"
+                value={form.spotify}
+                onChange={e => set('spotify', e.target.value)}
+                placeholder="https://open.spotify.com/artist/..."
+                className="field"
+              />
+            </Field>
+            <Field label="Website" htmlFor="website">
+              <input
+                id="website"
+                type="url"
+                value={form.website}
+                onChange={e => set('website', e.target.value)}
+                placeholder="https://yoursite.com"
+                className="field"
+              />
+            </Field>
+          </div>
+        </FieldGroup>
 
-            {/* Socials */}
-            <div className="pt-4 border-t border-border">
-              <p className="text-xs font-mono text-muted uppercase tracking-wider mb-4">Links & Socials</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelCls}>Instagram (without @)</label>
-                  <input
-                    type="text"
-                    value={form.instagram}
-                    onChange={e => set('instagram', e.target.value)}
-                    placeholder="yourbandhandle"
-                    className={inputCls}
-                  />
-                </div>
-                <div>
-                  <label className={labelCls}>TikTok (without @)</label>
-                  <input
-                    type="text"
-                    value={form.tiktok}
-                    onChange={e => set('tiktok', e.target.value)}
-                    placeholder="yourbandhandle"
-                    className={inputCls}
-                  />
-                </div>
-                <div>
-                  <label className={labelCls}>Spotify Artist URL</label>
-                  <input
-                    type="url"
-                    value={form.spotify}
-                    onChange={e => set('spotify', e.target.value)}
-                    placeholder="https://open.spotify.com/artist/..."
-                    className={inputCls}
-                  />
-                </div>
-                <div>
-                  <label className={labelCls}>Website</label>
-                  <input
-                    type="url"
-                    value={form.website}
-                    onChange={e => set('website', e.target.value)}
-                    placeholder="https://yoursite.com"
-                    className={inputCls}
-                  />
-                </div>
-              </div>
-            </div>
+        {/* Other info */}
+        <FieldGroup title="About Your Band">
+          <Field label="Band Bio" htmlFor="other_info" required>
+            <textarea
+              id="other_info"
+              value={form.other_info}
+              onChange={e => set('other_info', e.target.value)}
+              rows={5}
+              required
+              placeholder="Tell us about your band — your sound, your story, what makes you Davapalooza material. This becomes your public profile if you're selected."
+              className="field"
+            />
+          </Field>
+        </FieldGroup>
 
-            {/* Other info */}
-            <div className="pt-4 border-t border-border">
-              <p className="text-xs font-mono text-muted uppercase tracking-wider mb-4">About Your Band</p>
-              <div>
-                <label className={labelCls}>Band Bio *</label>
-                <textarea
-                  value={form.other_info}
-                  onChange={e => set('other_info', e.target.value)}
-                  rows={5}
-                  required
-                  placeholder="Tell us about your band — your sound, your story, what makes you Davapalooza material. This becomes your public profile if you're selected."
-                  className={inputCls}
-                />
-              </div>
-            </div>
+        <FormError>{error}</FormError>
 
-            {error && <p className="text-danger text-sm">{error}</p>}
-
-            <Button type="submit" variant="primary" size="lg" className="w-full" disabled={submitting}>
-              {submitting ? 'Sending...' : 'Submit Inquiry'}
-            </Button>
-          </form>
-        </Card>
-      </div>
-    </div>
+        <Button type="submit" variant="primary" size="lg" className="w-full" disabled={submitting}>
+          {submitting ? 'Sending...' : 'Submit Inquiry'}
+        </Button>
+      </form>
+    </FormPage>
   )
 }
