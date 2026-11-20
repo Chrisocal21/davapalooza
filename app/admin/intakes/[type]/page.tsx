@@ -53,6 +53,24 @@ export default function AdminIntakePage({ params }: { params: Promise<{ type: st
     }
   }
 
+  const remove = async (id: string, name: string) => {
+    if (!confirm(`Permanently delete "${name}"? This can't be undone.`)) return
+    setSaving(id)
+    try {
+      const res = await fetch(`/api/admin/intakes/${type}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      if (res.ok) {
+        setItems(prev => prev.filter(x => x.id !== id))
+        setExpandedId(null)
+      }
+    } finally {
+      setSaving(null)
+    }
+  }
+
   const newCount = items.filter(i => i.status === 'new').length
   const detailFields = config.fields.filter(f => f.key !== config.titleField)
   const emailKey = config.fields.find(f => f.key === 'email' || f.key === 'contact_email')?.key
@@ -166,6 +184,15 @@ export default function AdminIntakePage({ params }: { params: Promise<{ type: st
                           className="mt-2"
                         >
                           {saving === item.id ? 'Saving...' : 'Save Notes'}
+                        </Button>
+                        <Button
+                          onClick={() => remove(item.id, String(item[config.titleField]))}
+                          disabled={saving === item.id}
+                          variant="danger"
+                          size="sm"
+                          className="mt-2 ml-2"
+                        >
+                          Delete
                         </Button>
                       </div>
                     </div>

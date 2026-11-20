@@ -63,3 +63,19 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to update inquiry' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    await requireAuth();
+    const { id } = await request.json();
+    if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 });
+    await getDB().prepare(`DELETE FROM band_inquiries WHERE id = ?`).bind(id).run();
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    console.error('Error deleting band inquiry:', error);
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+  }
+}

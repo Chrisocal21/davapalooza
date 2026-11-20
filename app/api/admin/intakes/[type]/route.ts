@@ -48,3 +48,19 @@ export async function PATCH(request: NextRequest, { params }: Ctx) {
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest, { params }: Ctx) {
+  const config = getIntake((await params).type);
+  if (!config) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  try {
+    await requireAuth();
+    const { id } = await request.json();
+    if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 });
+    await getDB().prepare(`DELETE FROM ${config.table} WHERE id = ?`).bind(id).run();
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    console.error('Error deleting intake:', error);
+    return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+  }
+}

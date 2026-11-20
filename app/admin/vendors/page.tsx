@@ -61,6 +61,22 @@ export default function AdminVendorsPage() {
     } finally { setSaving(null) }
   }
 
+  const remove = async (id: string, name: string) => {
+    if (!confirm(`Permanently delete "${name}"? This can't be undone.`)) return
+    setSaving(id)
+    try {
+      const res = await fetch('/api/admin/vendors', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      if (res.ok) {
+        setRegistrations(prev => prev.filter(x => x.id !== id))
+        setExpandedId(null)
+      }
+    } finally { setSaving(null) }
+  }
+
   const saveNotes = async (id: string) => {
     setSaving(id)
     try {
@@ -178,6 +194,15 @@ export default function AdminVendorsPage() {
                           className="mt-2"
                         >
                           {saving === reg.id ? 'Saving...' : 'Save Notes'}
+                        </Button>
+                        <Button
+                          onClick={() => remove(reg.id, reg.business_name)}
+                          disabled={saving === reg.id}
+                          variant="danger"
+                          size="sm"
+                          className="mt-2 ml-2"
+                        >
+                          Delete
                         </Button>
                       </div>
                     </div>

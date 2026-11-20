@@ -111,6 +111,22 @@ export default function AdminBandsPage() {
     }
   }
 
+  const remove = async (id: string, name: string) => {
+    if (!confirm(`Permanently delete "${name}"? This can't be undone.`)) return
+    setSaving(id)
+    try {
+      const res = await fetch('/api/admin/bands', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      if (res.ok) {
+        setInquiries(prev => prev.filter(x => x.id !== id))
+        setExpandedId(null)
+      }
+    } finally { setSaving(null) }
+  }
+
   const saveNotes = async (id: string) => {
     setSaving(id)
     try {
@@ -235,6 +251,15 @@ export default function AdminBandsPage() {
                           className="mt-2"
                         >
                           {saving === inquiry.id ? 'Saving...' : 'Save Notes'}
+                        </Button>
+                        <Button
+                          onClick={() => remove(inquiry.id, inquiry.band_name)}
+                          disabled={saving === inquiry.id}
+                          variant="danger"
+                          size="sm"
+                          className="mt-2 ml-2"
+                        >
+                          Delete
                         </Button>
                       </div>
 
