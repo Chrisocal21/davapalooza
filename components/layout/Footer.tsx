@@ -15,6 +15,9 @@ const EXPLORE = [
 const GET_INVOLVED = [
   { href: '/bands', label: 'Play the Show' },
   { href: '/vendors', label: 'Set Up a Booth' },
+  { href: '/volunteer', label: 'Volunteer' },
+  { href: '/sponsors', label: 'Sponsor' },
+  { href: '/supporters', label: 'Photographers & Video' },
 ]
 
 const linkCls =
@@ -106,6 +109,9 @@ export default function Footer() {
             </Link>
             <Link href="/about" className="underline underline-offset-4 transition-colors hover:text-cream">
               About
+            </Link>
+            <Link href="/admin" className="underline underline-offset-4 transition-colors hover:text-cream">
+              Admin Login
             </Link>
             <span>{SITE.domain}</span>
           </p>

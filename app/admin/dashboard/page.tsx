@@ -18,6 +18,9 @@ interface QueueStats {
 interface IntakeCounts {
   bands: number
   vendors: number
+  volunteers: number
+  sponsors: number
+  supporters: number
 }
 
 interface RecentActivity {
@@ -38,7 +41,13 @@ export default function AdminDashboard() {
     totalSubmissions: 0,
   })
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
-  const [intakeCounts, setIntakeCounts] = useState<IntakeCounts>({ bands: 0, vendors: 0 })
+  const [intakeCounts, setIntakeCounts] = useState<IntakeCounts>({
+    bands: 0,
+    vendors: 0,
+    volunteers: 0,
+    sponsors: 0,
+    supporters: 0,
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -70,18 +79,18 @@ export default function AdminDashboard() {
 
   const fetchIntakeCounts = async () => {
     try {
-      const [bandsRes, vendorsRes] = await Promise.all([
-        fetch('/api/admin/bands?status=new'),
-        fetch('/api/admin/vendors?status=new'),
+      const get = async (url: string, key: string) => {
+        const res = await fetch(url)
+        return res.ok ? ((await res.json())[key] || []).length : 0
+      }
+      const [bands, vendors, volunteers, sponsors, supporters] = await Promise.all([
+        get('/api/admin/bands?status=new', 'inquiries'),
+        get('/api/admin/vendors?status=new', 'registrations'),
+        get('/api/admin/intakes/volunteers?status=new', 'items'),
+        get('/api/admin/intakes/sponsors?status=new', 'items'),
+        get('/api/admin/intakes/supporters?status=new', 'items'),
       ])
-      const [bandsData, vendorsData] = await Promise.all([
-        bandsRes.ok ? bandsRes.json() : { inquiries: [] },
-        vendorsRes.ok ? vendorsRes.json() : { registrations: [] },
-      ])
-      setIntakeCounts({
-        bands: (bandsData.inquiries || []).length,
-        vendors: (vendorsData.registrations || []).length,
-      })
+      setIntakeCounts({ bands, vendors, volunteers, sponsors, supporters })
     } catch {
       // non-critical
     }
@@ -177,9 +186,9 @@ export default function AdminDashboard() {
             </Card>
           </Link>
 
-          <ComingSoonCard title="Volunteer Sign-ups" description="Day-of volunteer roster" />
-          <ComingSoonCard title="Sponsor Inquiries" description="Paying / backing sponsor tier" />
-          <ComingSoonCard title="Supporters" description="Photographer &amp; videographer interest" />
+          <IntakeCard href="/admin/intakes/volunteers" title="Volunteer Sign-ups" description="Day-of volunteer roster" count={intakeCounts.volunteers} />
+          <IntakeCard href="/admin/intakes/sponsors" title="Sponsor Inquiries" description="Paying / backing sponsor tier" count={intakeCounts.sponsors} />
+          <IntakeCard href="/admin/intakes/supporters" title="Supporters" description="Photographer &amp; videographer interest" count={intakeCounts.supporters} />
         </div>
 
         {/* ── Recent Photo Activity ── */}
@@ -252,14 +261,16 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function ComingSoonCard({ title, description }: { title: string; description: string }) {
+function IntakeCard({ href, title, description, count }: { href: string; title: string; description: string; count: number }) {
   return (
-    <Card className="p-6 opacity-50 cursor-not-allowed select-none">
-      <div className="flex items-start justify-between mb-3">
-        <h4 className="text-xl font-display text-text">{title}</h4>
-        <span className="text-xs font-mono text-muted border border-border rounded px-2 py-0.5">soon</span>
-      </div>
-      <p className="text-muted text-sm">{description}</p>
-    </Card>
+    <Link href={href}>
+      <Card className="p-6 hover:border-primary transition-all cursor-pointer">
+        <div className="flex items-start justify-between mb-3">
+          <h4 className="text-xl font-display text-text">{title}</h4>
+          {count > 0 && <Badge variant="pending">{count} new</Badge>}
+        </div>
+        <p className="text-muted text-sm">{description}</p>
+      </Card>
+    </Link>
   )
 }

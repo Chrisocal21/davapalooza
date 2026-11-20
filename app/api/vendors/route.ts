@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
+import { notifyAdmin } from '@/lib/notify';
 
 function sanitize(val: unknown): string | null {
   if (typeof val !== 'string') return null;
@@ -51,6 +52,13 @@ export async function POST(request: NextRequest) {
         submittedAt
       )
       .run();
+
+    await notifyAdmin({
+      title: 'New vendor registration',
+      message: businessName,
+      path: '/admin/vendors',
+      tags: ['tent'],
+    });
 
     return NextResponse.json({ success: true, id }, { status: 201 });
   } catch (error) {
