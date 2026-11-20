@@ -1,6 +1,6 @@
 // The shop is a private preview until there is merch to sell.
 //
-// It lives at /shop-preview/<SHOP_PREVIEW_KEY>/ — an unlisted, unguessable URL
+// It lives at /preview/<SHOP_PREVIEW_KEY>/ — an unlisted, unguessable URL
 // that isn't linked from anywhere and is marked noindex. Anyone with the link
 // can view it (share it with the founders etc.); anyone without it gets a 404.
 // The public /store page stays the "Coming Soon" waitlist.
@@ -29,4 +29,5 @@ export function shopKeyValid(key: string): boolean {
   return diff === 0;
 }
 
-export const shopBase = (key: string) => `/shop-preview/${key}`;
+// Public URL; next.config.js rewrites /preview/* to the app/shop-preview/* routes.
+export const shopBase = (key: string) => `/preview/${key}`;

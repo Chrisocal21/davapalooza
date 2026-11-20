@@ -9,7 +9,7 @@ export interface CartLine {
 }
 
 interface CartCtx {
-  /** URL prefix of the shop, e.g. /shop-preview/<key> */
+  /** URL prefix of the shop, e.g. /preview/<key> */
   base: string
   lines: CartLine[]
   count: number

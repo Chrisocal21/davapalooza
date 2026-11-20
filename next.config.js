@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Short, friendly URL for the private shop preview (see lib/shop/enabled.ts).
+  async rewrites() {
+    return [{ source: '/preview/:path*', destination: '/shop-preview/:path*' }]
+  },
   images: {
     remotePatterns: [
       {
