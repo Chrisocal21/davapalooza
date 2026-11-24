@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getDB } from '@/lib/db';
 import { getIntake } from '@/lib/intakes';
+import { resolveYear, listYears, buildFilter } from '@/lib/admin/year';
+import { getIntakeYear } from '@/lib/events';
 
 type Ctx = { params: Promise<{ type: string }> };
 
@@ -13,13 +15,17 @@ export async function GET(request: NextRequest, { params }: Ctx) {
   if (!config) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   try {
     await requireAuth();
-    const status = new URL(request.url).searchParams.get('status');
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const year = resolveYear(searchParams);
     const db = getDB();
-    const stmt = status
-      ? db.prepare(`SELECT * FROM ${config.table} WHERE status = ? ORDER BY submitted_at DESC`).bind(status)
-      : db.prepare(`SELECT * FROM ${config.table} ORDER BY submitted_at DESC`);
-    const { results } = await stmt.all();
-    return NextResponse.json({ items: results });
+    const f = buildFilter(status, year);
+    const { results } = await db
+      .prepare(`SELECT * FROM ${config.table} ${f.sql} ORDER BY submitted_at DESC`)
+      .bind(...f.binds)
+      .all();
+    const years = await listYears(db, config.table);
+    return NextResponse.json({ items: results, year, years, current: getIntakeYear() });
   } catch (error: any) {
     if (error.message === 'Unauthorized') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     console.error('Error fetching intakes:', error);

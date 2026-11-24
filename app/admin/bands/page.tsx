@@ -5,6 +5,7 @@ import Link from 'next/link'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import YearSelect from '@/components/admin/YearSelect'
 import Button from '@/components/ui/Button'
 
 interface BandInquiry {
@@ -39,6 +40,8 @@ const PROMOTE_DEFAULT = { year: new Date().getFullYear().toString(), set_time: '
 export default function AdminBandsPage() {
   const [inquiries, setInquiries] = useState<BandInquiry[]>([])
   const [loading, setLoading] = useState(true)
+  const [year, setYear] = useState('')
+  const [yearInfo, setYearInfo] = useState<{ years: number[]; current: number }>({ years: [], current: new Date().getFullYear() })
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState<string | null>(null)
@@ -47,14 +50,15 @@ export default function AdminBandsPage() {
   const [promoteStatus, setPromoteStatus] = useState<Record<string, 'success' | 'error'>>({})
   const [promoting, setPromoting] = useState(false)
 
-  useEffect(() => { fetchInquiries() }, [])
+  useEffect(() => { fetchInquiries() }, [year])
 
   const fetchInquiries = async () => {
     try {
-      const res = await fetch('/api/admin/bands')
+      const res = await fetch(`/api/admin/bands${year ? `?year=${year}` : ''}`)
       if (res.ok) {
         const data = await res.json()
         setInquiries(data.inquiries || [])
+        setYearInfo({ years: data.years || [], current: data.current })
       }
     } catch { /* empty */ } finally { setLoading(false) }
   }
@@ -155,6 +159,8 @@ export default function AdminBandsPage() {
             ← Dashboard
           </Link>
         </div>
+
+        <YearSelect years={yearInfo.years} current={yearInfo.current} value={year} onChange={setYear} />
 
         {loading ? (
           <p className="text-muted text-center py-16">Loading...</p>

@@ -122,3 +122,13 @@ export function getEventDateParts(event: EventConfig): { weekday: string; month:
   const p = dateParts(event, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })
   return { weekday: p.weekday, month: p.month, day: p.day, year: p.year }
 }
+
+/**
+ * The event year new sign-ups (bands, vendors, volunteers, sponsors, supporters)
+ * belong to: the next event still to come or happening now; once every event is
+ * over, the year after the latest one. This flips by itself when an event ends —
+ * no manual reset — and last year's entries stay in the admin archive.
+ */
+export function getIntakeYear(now: Date = new Date()): number {
+  return getUpcomingEvent(now)?.year ?? getNextPlannedYear()
+}

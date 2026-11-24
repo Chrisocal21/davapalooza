@@ -5,6 +5,7 @@ import Link from 'next/link'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import YearSelect from '@/components/admin/YearSelect'
 import Button from '@/components/ui/Button'
 
 interface VendorRegistration {
@@ -33,18 +34,21 @@ const STATUSES = ['new', 'reviewed', 'accepted', 'declined', 'archived']
 export default function AdminVendorsPage() {
   const [registrations, setRegistrations] = useState<VendorRegistration[]>([])
   const [loading, setLoading] = useState(true)
+  const [year, setYear] = useState('')
+  const [yearInfo, setYearInfo] = useState<{ years: number[]; current: number }>({ years: [], current: new Date().getFullYear() })
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState<string | null>(null)
 
-  useEffect(() => { fetchRegistrations() }, [])
+  useEffect(() => { fetchRegistrations() }, [year])
 
   const fetchRegistrations = async () => {
     try {
-      const res = await fetch('/api/admin/vendors')
+      const res = await fetch(`/api/admin/vendors${year ? `?year=${year}` : ''}`)
       if (res.ok) {
         const data = await res.json()
         setRegistrations(data.registrations || [])
+        setYearInfo({ years: data.years || [], current: data.current })
       }
     } catch { /* empty */ } finally { setLoading(false) }
   }
@@ -105,6 +109,8 @@ export default function AdminVendorsPage() {
             ← Dashboard
           </Link>
         </div>
+
+        <YearSelect years={yearInfo.years} current={yearInfo.current} value={year} onChange={setYear} />
 
         {loading ? (
           <p className="text-muted text-center py-16">Loading...</p>

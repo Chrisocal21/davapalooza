@@ -86,7 +86,8 @@ CREATE TABLE IF NOT EXISTS band_inquiries (
   other_info TEXT,
   submitted_at TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'new',
-  admin_notes TEXT
+  admin_notes TEXT,
+  event_year INTEGER
 );
 
 -- Vendor / market stall registration
@@ -100,7 +101,8 @@ CREATE TABLE IF NOT EXISTS vendor_registrations (
   space_needs TEXT,
   submitted_at TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'new',
-  admin_notes TEXT
+  admin_notes TEXT,
+  event_year INTEGER
 );
 
 -- Volunteer sign-ups
@@ -114,7 +116,8 @@ CREATE TABLE IF NOT EXISTS volunteers (
   other_info TEXT,
   submitted_at TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'new',
-  admin_notes TEXT
+  admin_notes TEXT,
+  event_year INTEGER
 );
 
 -- Sponsor inquiries
@@ -128,7 +131,8 @@ CREATE TABLE IF NOT EXISTS sponsor_inquiries (
   message TEXT,
   submitted_at TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'new',
-  admin_notes TEXT
+  admin_notes TEXT,
+  event_year INTEGER
 );
 
 -- Supporter submissions (photographers / videographers)
@@ -143,8 +147,11 @@ CREATE TABLE IF NOT EXISTS supporter_submissions (
   other_info TEXT,
   submitted_at TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'new',
-  admin_notes TEXT
+  admin_notes TEXT,
+  event_year INTEGER
 );
+
+-- event_year = which Davapalooza the sign-up is for (see migrations/004_event_year.sql)
 
 -- Create indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
@@ -153,6 +160,11 @@ CREATE INDEX IF NOT EXISTS idx_submissions_submitted_at ON submissions(submitted
 CREATE INDEX IF NOT EXISTS idx_gallery_approved_at ON gallery(approved_at DESC);
 CREATE INDEX IF NOT EXISTS idx_gallery_sort_order ON gallery(sort_order);
 CREATE INDEX IF NOT EXISTS idx_artists_year ON artists(year);
+CREATE INDEX IF NOT EXISTS idx_band_inquiries_year ON band_inquiries(event_year);
+CREATE INDEX IF NOT EXISTS idx_vendor_registrations_year ON vendor_registrations(event_year);
+CREATE INDEX IF NOT EXISTS idx_volunteers_year ON volunteers(event_year);
+CREATE INDEX IF NOT EXISTS idx_sponsor_inquiries_year ON sponsor_inquiries(event_year);
+CREATE INDEX IF NOT EXISTS idx_supporter_submissions_year ON supporter_submissions(event_year);
 CREATE INDEX IF NOT EXISTS idx_artists_sort_order ON artists(sort_order);
 CREATE INDEX IF NOT EXISTS idx_news_published_at ON news(published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_band_inquiries_status ON band_inquiries(status);

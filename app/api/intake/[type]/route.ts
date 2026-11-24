@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
 import { getIntake } from '@/lib/intakes';
 import { notifyAdmin } from '@/lib/notify';
+import { getIntakeYear } from '@/lib/events';
 
 function sanitize(val: unknown): string | null {
   if (typeof val !== 'string') return null;
@@ -32,10 +33,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const id = crypto.randomUUID();
-    const cols = ['id', ...config.fields.map(f => f.key), 'submitted_at'];
+    const cols = ['id', ...config.fields.map(f => f.key), 'submitted_at', 'event_year'];
     await getDB()
       .prepare(`INSERT INTO ${config.table} (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`)
-      .bind(id, ...config.fields.map(f => values[f.key]), new Date().toISOString())
+      .bind(id, ...config.fields.map(f => values[f.key]), new Date().toISOString(), getIntakeYear())
       .run();
 
     await notifyAdmin({

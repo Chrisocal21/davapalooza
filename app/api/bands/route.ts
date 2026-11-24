@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
 import { notifyAdmin } from '@/lib/notify';
+import { getIntakeYear } from '@/lib/events';
 
 function sanitize(val: unknown): string | null {
   if (typeof val !== 'string') return null;
@@ -38,8 +39,8 @@ export async function POST(request: NextRequest) {
       .prepare(
         `INSERT INTO band_inquiries
          (id, band_name, contact_name, contact_email, contact_phone, genres,
-          instagram, tiktok, spotify, website, other_info, submitted_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          instagram, tiktok, spotify, website, other_info, submitted_at, event_year)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         id,
@@ -53,7 +54,8 @@ export async function POST(request: NextRequest) {
         sanitize(body.spotify),
         sanitize(body.website),
         sanitize(body.other_info),
-        submittedAt
+        submittedAt,
+        getIntakeYear()
       )
       .run();
 

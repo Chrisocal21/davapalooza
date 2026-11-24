@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import SectionHeader from '@/components/ui/SectionHeader'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
+import YearSelect from '@/components/admin/YearSelect'
 import Button from '@/components/ui/Button'
 import { getIntake } from '@/lib/intakes'
 
@@ -27,17 +28,22 @@ export default function AdminIntakePage({ params }: { params: Promise<{ type: st
 
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
+  const [year, setYear] = useState('')
+  const [yearInfo, setYearInfo] = useState<{ years: number[]; current: number }>({ years: [], current: new Date().getFullYear() })
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch(`/api/admin/intakes/${type}`)
+    fetch(`/api/admin/intakes/${type}${year ? `?year=${year}` : ''}`)
       .then(r => (r.ok ? r.json() : { items: [] }))
-      .then(d => setItems(d.items || []))
+      .then(d => {
+        setItems(d.items || [])
+        if (d.years) setYearInfo({ years: d.years, current: d.current })
+      })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [type])
+  }, [type, year])
 
   const patch = async (id: string, body: Record<string, string>) => {
     setSaving(id)
@@ -89,6 +95,8 @@ export default function AdminIntakePage({ params }: { params: Promise<{ type: st
             ← Dashboard
           </Link>
         </div>
+
+        <YearSelect years={yearInfo.years} current={yearInfo.current} value={year} onChange={setYear} />
 
         {loading ? (
           <p className="text-muted text-center py-16">Loading...</p>

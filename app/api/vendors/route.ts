@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
 import { notifyAdmin } from '@/lib/notify';
+import { getIntakeYear } from '@/lib/events';
 
 function sanitize(val: unknown): string | null {
   if (typeof val !== 'string') return null;
@@ -38,8 +39,8 @@ export async function POST(request: NextRequest) {
       .prepare(
         `INSERT INTO vendor_registrations
          (id, business_name, contact_name, contact_email, contact_phone,
-          product_description, space_needs, submitted_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+          product_description, space_needs, submitted_at, event_year)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         id,
@@ -49,7 +50,8 @@ export async function POST(request: NextRequest) {
         sanitize(body.contact_phone),
         productDescription,
         sanitize(body.space_needs),
-        submittedAt
+        submittedAt,
+        getIntakeYear()
       )
       .run();
 

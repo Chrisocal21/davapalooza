@@ -4,6 +4,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getDB } from '@/lib/db';
+import { resolveYear, listYears, buildFilter } from '@/lib/admin/year';
+import { getIntakeYear } from '@/lib/events';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,15 +14,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status'); // optional filter
 
-    const db = getDB();
-    const query = status
-      ? db.prepare(
-          `SELECT * FROM band_inquiries WHERE status = ? ORDER BY submitted_at DESC`
-        ).bind(status)
-      : db.prepare(`SELECT * FROM band_inquiries ORDER BY submitted_at DESC`);
+    const year = resolveYear(searchParams);
 
-    const { results } = await query.all();
-    return NextResponse.json({ inquiries: results });
+    const db = getDB();
+    const f = buildFilter(status, year);
+    const { results } = await db
+      .prepare(`SELECT * FROM band_inquiries ${f.sql} ORDER BY submitted_at DESC`)
+      .bind(...f.binds)
+      .all();
+    const years = await listYears(db, 'band_inquiries');
+    return NextResponse.json({ inquiries: results, year, years, current: getIntakeYear() });
   } catch (error: any) {
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
