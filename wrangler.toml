@@ -1,5 +1,5 @@
 name = "davapalooza"
-main = ".open-next/worker.js"
+main = "worker.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = false
@@ -19,6 +19,11 @@ zone_name = "southoblockparty.com"
 [[routes]]
 pattern = "www.southoblockparty.com/*"
 zone_name = "southoblockparty.com"
+
+# Wakes every 15 minutes; lib/notifyDigest.ts decides whether to act (every run on
+# event day, once at 9am Pacific otherwise) and sends ONE summary of new sign-ups and photos.
+[triggers]
+crons = ["*/15 * * * *"]
 
 [assets]
 directory = ".open-next/assets"

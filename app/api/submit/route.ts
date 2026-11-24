@@ -6,7 +6,7 @@ import { getDB, submissionQueries } from '@/lib/db';
 import { uploadToR2, R2_PATHS, isValidImageType, isValidFileSize, getFileExtension } from '@/lib/r2';
 import { checkSubmissionText } from '@/lib/moderation/textFilter';
 import { scanImage } from '@/lib/moderation/imageScan';
-import { notifyAdmin } from '@/lib/notify';
+import { queueNotification } from '@/lib/notifyDigest';
 import { getPhotoYear } from '@/lib/events';
 import { guardSubmission } from '@/lib/spam';
 
@@ -125,12 +125,9 @@ export async function POST(request: NextRequest) {
       queue,
     });
 
-    await notifyAdmin({
-      title: queue === 'needs_review' ? 'New photo (needs review)' : 'New photo submitted',
-      message: handle.trim(),
-      path: `/admin/queue/${queue === 'needs_review' ? 'needs-review' : 'looks-good'}`,
-      tags: [queue === 'needs_review' ? 'warning' : 'camera'],
-    });
+    // Queued for the next phone summary (lib/notifyDigest.ts), not sent instantly.
+    await queueNotification(db, queue === 'needs_review' ? 'photo_review' : 'photo_good', handle.trim());
+
     return NextResponse.json(
       {
         message: 'Photo submitted successfully! It will be reviewed shortly.',

@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
-import { notifyAdmin } from '@/lib/notify';
+import { queueNotification } from '@/lib/notifyDigest';
 import { getIntakeYear } from '@/lib/events';
 import { guardSubmission } from '@/lib/spam';
 
@@ -58,12 +58,7 @@ export async function POST(request: NextRequest) {
       )
       .run();
 
-    await notifyAdmin({
-      title: 'New vendor registration',
-      message: businessName,
-      path: '/admin/vendors',
-      tags: ['tent'],
-    });
+    await queueNotification(db, 'vendor', businessName);
 
     return NextResponse.json({ success: true, id }, { status: 201 });
   } catch (error) {

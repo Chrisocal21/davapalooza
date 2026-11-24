@@ -4,12 +4,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getDB, storeEmailQueries } from '@/lib/db';
+import { mailConfigured } from '@/lib/mail';
 
 export async function GET() {
   try {
     await requireAuth();
     const emails = await storeEmailQueries.getAll(getDB());
-    return NextResponse.json({ emails });
+    return NextResponse.json({ emails, mailConfigured: mailConfigured() });
   } catch (error: any) {
     if (error.message === 'Unauthorized') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     console.error('Error fetching store emails:', error);

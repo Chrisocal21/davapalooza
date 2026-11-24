@@ -3,7 +3,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDB, storeEmailQueries } from '@/lib/db';
 import { guardSubmission } from '@/lib/spam';
-import { notifyAdmin } from '@/lib/notify';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,15 +18,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Already on the list? Say thanks anyway — no need to reveal that.
-    const added = await storeEmailQueries.create(db, email);
-    if (added) {
-      await notifyAdmin({
-        title: 'New store waitlist signup',
-        message: email,
-        path: '/admin/store-emails',
-        tags: ['bell'],
-      });
-    }
+    // No phone notification here on purpose: signups show up on the admin dashboard.
+    await storeEmailQueries.create(db, email);
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {

@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
-import { notifyAdmin } from '@/lib/notify';
+import { queueNotification } from '@/lib/notifyDigest';
 import { getIntakeYear } from '@/lib/events';
 import { guardSubmission } from '@/lib/spam';
 
@@ -62,12 +62,7 @@ export async function POST(request: NextRequest) {
       )
       .run();
 
-    await notifyAdmin({
-      title: 'New band inquiry',
-      message: [bandName, sanitize(body.genres)].filter(Boolean).join(' · '),
-      path: '/admin/bands',
-      tags: ['guitar'],
-    });
+    await queueNotification(db, 'band', [bandName, sanitize(body.genres)].filter(Boolean).join(' · '));
 
     return NextResponse.json({ success: true, id }, { status: 201 });
   } catch (error) {

@@ -6,7 +6,10 @@
 
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
-function readEnv(name: string): string | undefined {
+function readEnv(name: string, workerEnv?: Record<string, unknown>): string | undefined {
+  // Scheduled (cron) runs have no request context, so the Worker's env is passed in.
+  const direct = workerEnv?.[name];
+  if (typeof direct === 'string' && direct) return direct;
   try {
     const { env } = getCloudflareContext();
     const v = (env as unknown as Record<string, unknown>)[name];
@@ -23,13 +26,14 @@ export async function notifyAdmin(opts: {
   /** Site-relative path to open when the notification is tapped, e.g. /admin/bands */
   path?: string;
   tags?: string[];
-}): Promise<void> {
-  const topic = readEnv('NTFY_TOPIC');
-  if (!topic) return;
+}, workerEnv?: Record<string, unknown>): Promise<boolean> {
+  // Returns true when delivered (or when notifications aren't set up at all).
+  const topic = readEnv('NTFY_TOPIC', workerEnv);
+  if (!topic) return true;
 
-  const server = (readEnv('NTFY_SERVER') || 'https://ntfy.sh').replace(/\/+$/, '');
-  const token = readEnv('NTFY_TOKEN');
-  const site = (readEnv('NEXT_PUBLIC_SITE_URL') || 'https://www.southoblockparty.com').replace(/\/+$/, '');
+  const server = (readEnv('NTFY_SERVER', workerEnv) || 'https://ntfy.sh').replace(/\/+$/, '');
+  const token = readEnv('NTFY_TOKEN', workerEnv);
+  const site = (readEnv('NEXT_PUBLIC_SITE_URL', workerEnv) ||'https://www.southoblockparty.com').replace(/\/+$/, '');
 
   const body = JSON.stringify({
     topic,
@@ -55,11 +59,12 @@ export async function notifyAdmin(opts: {
         body,
         signal: AbortSignal.timeout(3000),
       });
-      if (res.ok) return;
+      if (res.ok) return true;
       console.error(`ntfy responded ${res.status} (attempt ${attempt + 1}/${DELAYS_MS.length})`);
-      if (res.status !== 429 && res.status < 500) return; // our request is wrong; retrying won't help
+      if (res.status !== 429 && res.status < 500) return false; // our request is wrong; retrying won't help
     } catch (error) {
       console.error(`Admin notification failed (attempt ${attempt + 1}/${DELAYS_MS.length}):`, error);
     }
   }
+  return false;
 }

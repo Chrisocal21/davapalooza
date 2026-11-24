@@ -24,6 +24,14 @@ CREATE TABLE IF NOT EXISTS submissions (
   event_year INTEGER
 );
 
+-- New sign-ups/photos waiting to be included in the next phone notification summary
+CREATE TABLE IF NOT EXISTS pending_notifications (
+  id TEXT PRIMARY KEY,
+  category TEXT NOT NULL,
+  detail TEXT,
+  created_at TEXT NOT NULL
+);
+
 -- Gallery table (approved, public-facing photos)
 CREATE TABLE IF NOT EXISTS gallery (
   id TEXT PRIMARY KEY,
@@ -70,7 +78,9 @@ CREATE TABLE IF NOT EXISTS news (
 CREATE TABLE IF NOT EXISTS store_emails (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL,
-  captured_at TEXT NOT NULL
+  captured_at TEXT NOT NULL,
+  unsubscribe_token TEXT,
+  last_emailed_at TEXT
 );
 
 -- Band/artist interest form

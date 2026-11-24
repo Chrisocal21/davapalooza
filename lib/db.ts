@@ -65,6 +65,8 @@ export interface StoreEmail {
   id: string;
   email: string;
   captured_at: string;
+  unsubscribe_token: string | null;
+  last_emailed_at: string | null;
 }
 
 // Get D1 database instance from Cloudflare context
@@ -477,16 +479,30 @@ export const storeEmailQueries = {
     if (existing) return false;
     await db
       .prepare(
-        `INSERT INTO store_emails (id, email, captured_at)
-         VALUES (?, ?, ?)`
+        `INSERT INTO store_emails (id, email, captured_at, unsubscribe_token)
+         VALUES (?, ?, ?, ?)`
       )
-      .bind(crypto.randomUUID(), email, new Date().toISOString())
+      .bind(crypto.randomUUID(), email, new Date().toISOString(), crypto.randomUUID().replace(/-/g, ''))
       .run();
     return true;
   },
 
   async remove(db: D1Database, id: string): Promise<void> {
     await db.prepare('DELETE FROM store_emails WHERE id = ?').bind(id).run();
+  },
+
+  /** Self-service unsubscribe from the link in an email. Returns true if someone was removed. */
+  async removeByToken(db: D1Database, token: string): Promise<boolean> {
+    if (!/^[a-f0-9]{32}$/.test(token)) return false;
+    const r = await db.prepare('DELETE FROM store_emails WHERE unsubscribe_token = ?').bind(token).run();
+    return (r.meta?.changes ?? 0) > 0;
+  },
+
+  async markEmailed(db: D1Database, ids: string[]): Promise<void> {
+    const now = new Date().toISOString();
+    for (const id of ids) {
+      await db.prepare('UPDATE store_emails SET last_emailed_at = ? WHERE id = ?').bind(now, id).run();
+    }
   },
 
   async getAll(db: D1Database): Promise<StoreEmail[]> {

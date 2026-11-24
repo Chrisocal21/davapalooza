@@ -3,9 +3,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
 import { getIntake } from '@/lib/intakes';
-import { notifyAdmin } from '@/lib/notify';
+import { queueNotification, type NotifyCategory } from '@/lib/notifyDigest';
 import { getIntakeYear } from '@/lib/events';
 import { guardSubmission } from '@/lib/spam';
+
+const INTAKE_CATEGORY: Record<string, NotifyCategory> = {
+  volunteers: 'volunteer',
+  sponsors: 'sponsor',
+  supporters: 'supporter',
+};
 
 function sanitize(val: unknown): string | null {
   if (typeof val !== 'string') return null;
@@ -42,12 +48,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .bind(id, ...config.fields.map(f => values[f.key]), new Date().toISOString(), getIntakeYear())
       .run();
 
-    await notifyAdmin({
-      title: `New ${config.singular}`,
-      message: values[config.titleField] ?? '',
-      path: `/admin/intakes/${type}`,
-      tags: [config.tag],
-    });
+    await queueNotification(getDB(), INTAKE_CATEGORY[type],values[config.titleField] ?? '');
 
     return NextResponse.json({ success: true, id }, { status: 201 });
   } catch (error) {
