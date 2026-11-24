@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server';
 import { getDB, newsQueries } from '@/lib/db';
 import { getPublicUrl } from '@/lib/r2';
+import { getIntakeYear } from '@/lib/events';
 
 export async function GET() {
   try {
@@ -18,6 +19,7 @@ export async function GET() {
 
     return NextResponse.json({
       news: newsWithUrls,
+      currentYear: getIntakeYear(),
     });
   } catch (error) {
     console.error('Error fetching news:', error);

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDB } from '@/lib/db';
 import { notifyAdmin } from '@/lib/notify';
 import { getIntakeYear } from '@/lib/events';
+import { guardSubmission } from '@/lib/spam';
 
 function sanitize(val: unknown): string | null {
   if (typeof val !== 'string') return null;
@@ -14,6 +15,8 @@ function sanitize(val: unknown): string | null {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const blocked = await guardSubmission({ db: getDB(), request, scope: 'form', honeypot: body.hp });
+    if (blocked) return blocked;
 
     const bandName = sanitize(body.band_name);
     const contactName = sanitize(body.contact_name);

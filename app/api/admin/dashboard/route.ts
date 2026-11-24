@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getDB, submissionQueries } from '@/lib/db';
 import { getPublicUrl } from '@/lib/r2';
+import { getPhotoYear } from '@/lib/events';
 
 export async function GET() {
   try {
@@ -12,7 +13,14 @@ export async function GET() {
     await requireAuth();
 
     const db = getDB();
-    const queueCounts = await submissionQueries.getQueueCounts(db);
+    const photoYear = getPhotoYear();
+    const queueCounts = await submissionQueries.getQueueCounts(db, photoYear);
+    const older = await db
+      .prepare(
+        'SELECT COUNT(*) AS n FROM submissions WHERE queue IS NOT NULL AND (event_year IS NULL OR event_year < ?)'
+      )
+      .bind(photoYear)
+      .first<{ n: number }>();
     const statusCounts = await submissionQueries.getStatusCounts(db);
     const recentActivity = await submissionQueries.getRecentActivity(db, 5);
 
@@ -27,6 +35,8 @@ export async function GET() {
 
     return NextResponse.json({
       queueCounts,
+      olderPending: older?.n ?? 0,
+      photoYear,
       statusCounts,
       recentActivity: activityWithUrls,
     });

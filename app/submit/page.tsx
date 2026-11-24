@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Button from '@/components/ui/Button'
+import Honeypot from '@/components/ui/Honeypot'
 import Field, { FormError } from '@/components/ui/Field'
 import { FormPage, FormSuccess, Steps } from '@/components/ui/FormLayout'
 import Icon from '@/components/ui/Icon'
@@ -12,6 +13,7 @@ const EMPTY = { handle: '', platform: '', caption: '', name: '', agreed: false }
 export default function SubmitPage() {
   const [formData, setFormData] = useState(EMPTY)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [hp, setHp] = useState('')
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   // Some browsers can't draw HEIC, so the preview can fail even for a good file.
   const [previewFailed, setPreviewFailed] = useState(false)
@@ -63,6 +65,7 @@ export default function SubmitPage() {
       if (formData.caption) formDataToSend.append('caption', formData.caption)
       if (formData.name) formDataToSend.append('name', formData.name)
       formDataToSend.append('agreement', 'true')
+      formDataToSend.append('hp', hp)
 
       const response = await fetch('/api/submit', {
         method: 'POST',
@@ -130,6 +133,7 @@ export default function SubmitPage() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-7">
+        <Honeypot value={hp} onChange={setHp} />
         {/* Drag & Drop Zone */}
         <div>
           <p className="mb-1.5 text-[0.95rem] font-semibold leading-tight text-ink" id="photo-label">

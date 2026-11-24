@@ -20,6 +20,7 @@ export interface Submission {
   submitted_at: string;
   reviewed_at: string | null;
   approved_at: string | null;
+  event_year: number | null;
 }
 
 export interface GalleryPhoto {
@@ -57,6 +58,7 @@ export interface NewsPost {
   photo_r2_key: string | null;
   published_at: string;
   updated_at: string | null;
+  event_year: number | null;
 }
 
 export interface StoreEmail {
@@ -86,12 +88,13 @@ export const submissionQueries = {
       caption?: string;
       name?: string;
       original_r2_key: string;
+      event_year?: number;
     }
   ): Promise<void> {
     await db
       .prepare(
-        `INSERT INTO submissions (id, handle, platform, caption, name, original_r2_key, submitted_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO submissions (id, handle, platform, caption, name, original_r2_key, submitted_at, event_year)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         data.id,
@@ -100,7 +103,8 @@ export const submissionQueries = {
         data.caption || null,
         data.name || null,
         data.original_r2_key,
-        new Date().toISOString()
+        new Date().toISOString(),
+        data.event_year ?? null
       )
       .run();
   },
@@ -113,11 +117,17 @@ export const submissionQueries = {
     return result || null;
   },
 
-  async getByQueue(db: D1Database, queue: 'looks_good' | 'needs_review'): Promise<Submission[]> {
-    const result = await db
-      .prepare('SELECT * FROM submissions WHERE queue = ? ORDER BY submitted_at DESC')
-      .bind(queue)
-      .all<Submission>();
+  async getByQueue(
+    db: D1Database,
+    queue: 'looks_good' | 'needs_review',
+    year: number | null = null
+  ): Promise<Submission[]> {
+    const result = await (year === null
+      ? db.prepare('SELECT * FROM submissions WHERE queue = ? ORDER BY submitted_at DESC').bind(queue)
+      : db
+          .prepare('SELECT * FROM submissions WHERE queue = ? AND event_year = ? ORDER BY submitted_at DESC')
+          .bind(queue, year)
+    ).all<Submission>();
     return result.results || [];
   },
 
@@ -175,16 +185,19 @@ export const submissionQueries = {
       .run();
   },
 
-  async getQueueCounts(db: D1Database): Promise<{ looks_good: number; needs_review: number }> {
-    const looksGood = await db
-      .prepare('SELECT COUNT(*) as count FROM submissions WHERE queue = ?')
-      .bind('looks_good')
-      .first<{ count: number }>();
-    
-    const needsReview = await db
-      .prepare('SELECT COUNT(*) as count FROM submissions WHERE queue = ?')
-      .bind('needs_review')
-      .first<{ count: number }>();
+  async getQueueCounts(
+    db: D1Database,
+    year: number | null = null
+  ): Promise<{ looks_good: number; needs_review: number }> {
+    const count = (queue: string) =>
+      year === null
+        ? db.prepare('SELECT COUNT(*) as count FROM submissions WHERE queue = ?').bind(queue).first<{ count: number }>()
+        : db
+            .prepare('SELECT COUNT(*) as count FROM submissions WHERE queue = ? AND event_year = ?')
+            .bind(queue, year)
+            .first<{ count: number }>();
+    const looksGood = await count('looks_good');
+    const needsReview = await count('needs_review');
 
     return {
       looks_good: looksGood?.count || 0,
@@ -244,12 +257,13 @@ export const galleryQueries = {
       handle: string;
       caption: string | null;
       watermarked_r2_key: string;
+      year?: number | null;
     }
   ): Promise<void> {
     await db
       .prepare(
-        `INSERT INTO gallery (id, submission_id, handle, caption, watermarked_r2_key, approved_at)
-         VALUES (?, ?, ?, ?, ?, ?)`
+        `INSERT INTO gallery (id, submission_id, handle, caption, watermarked_r2_key, approved_at, year)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         data.id,
@@ -257,7 +271,8 @@ export const galleryQueries = {
         data.handle,
         data.caption,
         data.watermarked_r2_key,
-        new Date().toISOString()
+        new Date().toISOString(),
+        data.year ?? null
       )
       .run();
   },
@@ -393,19 +408,21 @@ export const newsQueries = {
       title: string;
       body: string;
       photo_r2_key?: string;
+      event_year?: number;
     }
   ): Promise<void> {
     await db
       .prepare(
-        `INSERT INTO news (id, title, body, photo_r2_key, published_at)
-         VALUES (?, ?, ?, ?, ?)`
+        `INSERT INTO news (id, title, body, photo_r2_key, published_at, event_year)
+         VALUES (?, ?, ?, ?, ?, ?)`
       )
       .bind(
         data.id,
         data.title,
         data.body,
         data.photo_r2_key || null,
-        new Date().toISOString()
+        new Date().toISOString(),
+        data.event_year ?? null
       )
       .run();
   },
@@ -451,15 +468,25 @@ export const newsQueries = {
 
 // Store email queries
 export const storeEmailQueries = {
-  async create(db: D1Database, email: string): Promise<void> {
-    const id = crypto.randomUUID();
+  /** Saves the email unless it's already on the list (case-insensitive). Returns true if newly added. */
+  async create(db: D1Database, email: string): Promise<boolean> {
+    const existing = await db
+      .prepare('SELECT id FROM store_emails WHERE lower(email) = lower(?)')
+      .bind(email)
+      .first();
+    if (existing) return false;
     await db
       .prepare(
         `INSERT INTO store_emails (id, email, captured_at)
          VALUES (?, ?, ?)`
       )
-      .bind(id, email, new Date().toISOString())
+      .bind(crypto.randomUUID(), email, new Date().toISOString())
       .run();
+    return true;
+  },
+
+  async remove(db: D1Database, id: string): Promise<void> {
+    await db.prepare('DELETE FROM store_emails WHERE id = ?').bind(id).run();
   },
 
   async getAll(db: D1Database): Promise<StoreEmail[]> {

@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getDB, submissionQueries, galleryQueries } from '@/lib/db';
 import { downloadFromR2, uploadToR2, R2_PATHS, getFileExtension } from '@/lib/r2';
+import { watermarkPhoto } from '@/lib/watermark';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,20 +36,16 @@ export async function POST(request: NextRequest) {
     // Download original image from R2
     const originalImage = await downloadFromR2(submission.original_r2_key);
 
-    // TODO: Apply watermark when we have a Workers-compatible solution
-    // For now, just copy the original image to gallery
-    const watermarkedImage = originalImage;
+    // Watermark + cap the size. If the Images service can't read the photo this
+    // returns the original, so approving always works.
+    const originalExt = getFileExtension(submission.original_r2_key);
+    let originalType = 'image/jpeg';
+    if (originalExt === 'png') originalType = 'image/png';
+    if (originalExt === 'heic' || originalExt === 'heif') originalType = 'image/heic';
 
-    // Upload to gallery folder
-    const fileExtension = getFileExtension(submission.original_r2_key);
-    const watermarkedKey = R2_PATHS.gallery(id, fileExtension);
-    
-    // Determine content type from extension
-    let contentType = 'image/jpeg';
-    if (fileExtension === 'png') contentType = 'image/png';
-    if (fileExtension === 'heic' || fileExtension === 'heif') contentType = 'image/heic';
-    
-    await uploadToR2(watermarkedKey, watermarkedImage, contentType);
+    const wm = await watermarkPhoto(originalImage, originalType);
+    const watermarkedKey = R2_PATHS.gallery(id, wm.applied ? 'jpg' : originalExt);
+    await uploadToR2(watermarkedKey, wm.bytes, wm.contentType);
 
     // Update submission status
     await submissionQueries.approve(db, id, watermarkedKey);
@@ -60,6 +57,7 @@ export async function POST(request: NextRequest) {
       handle: submission.handle,
       caption: submission.caption,
       watermarked_r2_key: watermarkedKey,
+      year: submission.event_year,
     });
 
     return NextResponse.json({

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
+import Honeypot from '@/components/ui/Honeypot'
 import Field, { FormError } from '@/components/ui/Field'
 import { FormPage, FormSuccess, Steps } from '@/components/ui/FormLayout'
 import type { IconName } from '@/components/ui/Icon'
@@ -35,7 +36,7 @@ interface Props {
 
 export default function IntakeForm(p: Props) {
   const [form, setForm] = useState<Record<string, string>>(() =>
-    Object.fromEntries(p.fields.map(f => [f.key, ''])),
+    ({ ...Object.fromEntries(p.fields.map(f => [f.key, ''])), hp: '' }),
   )
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -90,6 +91,7 @@ export default function IntakeForm(p: Props) {
       aside={<Steps title={p.asideTitle} items={p.asideItems} />}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        <Honeypot value={form.hp} onChange={v => set('hp', v)} />
         <div className="grid grid-cols-1 gap-x-5 gap-y-6 md:grid-cols-2">
           {p.fields.map(f => {
             const id = `f_${f.key}`

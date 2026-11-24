@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
+import Honeypot from '@/components/ui/Honeypot'
 import Field, { FieldGroup, FormError } from '@/components/ui/Field'
 import { FormPage, FormSuccess, Steps } from '@/components/ui/FormLayout'
 
@@ -16,6 +17,7 @@ const EMPTY = {
   spotify: '',
   website: '',
   other_info: '',
+  hp: '',
 }
 
 export default function BandsPage() {
@@ -82,6 +84,7 @@ export default function BandsPage() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-7">
+        <Honeypot value={form.hp} onChange={v => set('hp', v)} />
         {/* Band info */}
         <Field label="Band / Artist Name" htmlFor="band_name" required>
           <input

@@ -14,11 +14,11 @@ import { getIntakeYear } from '@/lib/events';
  *   "all"     → null, meaning every year
  *   "2026"    → that year
  */
-export function resolveYear(searchParams: URLSearchParams): number | null {
+export function resolveYear(searchParams: URLSearchParams, fallback: number = getIntakeYear()): number | null {
   const raw = searchParams.get('year');
   if (raw === 'all') return null;
   const n = raw ? parseInt(raw, 10) : NaN;
-  return Number.isInteger(n) && n > 1900 && n < 3000 ? n : getIntakeYear();
+  return Number.isInteger(n) && n > 1900 && n < 3000 ? n : fallback;
 }
 
 /** Every year that has entries in `table`, plus the current intake year, newest first. */

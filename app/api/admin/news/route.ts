@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
+import { getIntakeYear } from '@/lib/events';
 import { getDB, newsQueries } from '@/lib/db';
 import { uploadToR2, R2_PATHS, getFileExtension, isValidNewsFileType } from '@/lib/r2';
 
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
       title,
       body: body,
       photo_r2_key: photoKey,
+      event_year: getIntakeYear(),
     });
 
     return NextResponse.json({

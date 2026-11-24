@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
+import Honeypot from '@/components/ui/Honeypot'
 import Field, { FieldGroup, FormError } from '@/components/ui/Field'
 import { FormPage, FormSuccess, Steps } from '@/components/ui/FormLayout'
 
@@ -12,6 +13,7 @@ const EMPTY = {
   contact_phone: '',
   product_description: '',
   space_needs: '',
+  hp: '',
 }
 
 export default function VendorsPage() {
@@ -78,6 +80,7 @@ export default function VendorsPage() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-7">
+        <Honeypot value={form.hp} onChange={v => set('hp', v)} />
         {/* Business info */}
         <Field label="Business / Vendor Name" htmlFor="business_name" required>
           <input

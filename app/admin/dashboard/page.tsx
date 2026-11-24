@@ -21,6 +21,7 @@ interface IntakeCounts {
   volunteers: number
   sponsors: number
   supporters: number
+  waitlist: number
 }
 
 interface RecentActivity {
@@ -47,8 +48,10 @@ export default function AdminDashboard() {
     volunteers: 0,
     sponsors: 0,
     supporters: 0,
+    waitlist: 0,
   })
   const [loading, setLoading] = useState(true)
+  const [olderPending, setOlderPending] = useState(0)
 
   useEffect(() => {
     fetchStats()
@@ -69,6 +72,7 @@ export default function AdminDashboard() {
           totalSubmissions: data.statusCounts.total || 0,
         })
         setRecentActivity(data.recentActivity || [])
+        setOlderPending(data.olderPending || 0)
       }
     } catch (error) {
       console.error('Failed to fetch stats:', error)
@@ -83,14 +87,15 @@ export default function AdminDashboard() {
         const res = await fetch(url)
         return res.ok ? ((await res.json())[key] || []).length : 0
       }
-      const [bands, vendors, volunteers, sponsors, supporters] = await Promise.all([
+      const [bands, vendors, volunteers, sponsors, supporters, waitlist] = await Promise.all([
         get('/api/admin/bands?status=new', 'inquiries'),
         get('/api/admin/vendors?status=new', 'registrations'),
         get('/api/admin/intakes/volunteers?status=new', 'items'),
         get('/api/admin/intakes/sponsors?status=new', 'items'),
         get('/api/admin/intakes/supporters?status=new', 'items'),
+        get('/api/admin/store-emails', 'emails'),
       ])
-      setIntakeCounts({ bands, vendors, volunteers, sponsors, supporters })
+      setIntakeCounts({ bands, vendors, volunteers, sponsors, supporters, waitlist })
     } catch {
       // non-critical
     }
@@ -110,6 +115,12 @@ export default function AdminDashboard() {
 
         {/* ── Photo Moderation ── */}
         <SectionLabel>Photo Moderation</SectionLabel>
+
+        {olderPending > 0 && (
+          <p className="mb-4 text-sm text-muted">
+            {olderPending} unreviewed photo{olderPending === 1 ? '' : 's'} from earlier years — open a queue and pick an archive year to see {olderPending === 1 ? 'it' : 'them'}.
+          </p>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <Link href="/admin/queue/looks-good">
@@ -189,6 +200,7 @@ export default function AdminDashboard() {
           <IntakeCard href="/admin/intakes/volunteers" title="Volunteer Sign-ups" description="Day-of volunteer roster" count={intakeCounts.volunteers} />
           <IntakeCard href="/admin/intakes/sponsors" title="Sponsor Inquiries" description="Paying / backing sponsor tier" count={intakeCounts.sponsors} />
           <IntakeCard href="/admin/intakes/supporters" title="Supporters" description="Photographer &amp; videographer interest" count={intakeCounts.supporters} />
+          <IntakeCard href="/admin/store-emails" title="Store Waitlist" description="Emails waiting for the merch store" count={intakeCounts.waitlist} label="signed up" />
         </div>
 
         {/* ── Recent Photo Activity ── */}
@@ -261,13 +273,13 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function IntakeCard({ href, title, description, count }: { href: string; title: string; description: string; count: number }) {
+function IntakeCard({ href, title, description, count, label = 'new' }: { href: string; title: string; description: string; count: number; label?: string }) {
   return (
     <Link href={href}>
       <Card className="p-6 hover:border-primary transition-all cursor-pointer">
         <div className="flex items-start justify-between mb-3">
           <h4 className="text-xl font-display text-text">{title}</h4>
-          {count > 0 && <Badge variant="pending">{count} new</Badge>}
+          {count > 0 && <Badge variant="pending">{count} {label}</Badge>}
         </div>
         <p className="text-muted text-sm">{description}</p>
       </Card>

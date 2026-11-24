@@ -14,6 +14,7 @@ interface NewsPost {
   photo_r2_key: string | null;
   photoUrl: string | null;
   published_at: string;
+  event_year: number | null;
 }
 
 const thumbOf = (post: NewsPost) => (post.photoUrl && !isPdf(post.photo_r2_key) ? post.photoUrl : null)
@@ -48,15 +49,21 @@ const readMore = 'mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold 
 export default function NewsPage() {
   const [newsPosts, setNewsPosts] = useState<NewsPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
 
   useEffect(() => {
     fetch('/api/news')
       .then(r => r.json())
-      .then(data => { setNewsPosts(data.news || []); setLoading(false); })
+      .then(data => { setNewsPosts(data.news || []); setCurrentYear(data.currentYear ?? null); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
-  const [lead, ...rest] = newsPosts
+  // This year's posts lead; earlier years drop into a quiet "Past years" list.
+  // Until the new year has its first post, everything stays up front.
+  const current = currentYear === null ? newsPosts : newsPosts.filter(p => p.event_year == null || p.event_year >= currentYear)
+  const featured = current.length > 0 ? current : newsPosts
+  const archive = current.length > 0 ? newsPosts.filter(p => !current.includes(p)) : []
+  const [lead, ...rest] = featured
 
   return (
     <>
@@ -131,6 +138,32 @@ export default function NewsPage() {
                     </li>
                   ))}
                 </ul>
+              )}
+
+              {/* Earlier years */}
+              {archive.length > 0 && (
+                <section className="mt-16 border-t-2 border-ink/15 pt-10" aria-labelledby="news-archive">
+                  <h2 id="news-archive" className="eyebrow mb-4 text-muted">
+                    Past years
+                  </h2>
+                  <ul className="divide-y-2 divide-ink/10">
+                    {archive.map(post => (
+                      <li key={post.id}>
+                        <Link
+                          href={`/news/${post.id}`}
+                          className="group flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4"
+                        >
+                          <span className="font-display text-2xl text-ink transition-colors group-hover:text-sun-red">
+                            {post.title}
+                          </span>
+                          <span className="eyebrow text-muted">
+                            <time dateTime={post.published_at}>{formatPostDate(post.published_at)}</time>
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               )}
             </>
           )}

@@ -132,3 +132,12 @@ export function getEventDateParts(event: EventConfig): { weekday: string; month:
 export function getIntakeYear(now: Date = new Date()): number {
   return getUpcomingEvent(now)?.year ?? getNextPlannedYear()
 }
+
+/**
+ * The year new photo submissions belong to: the event that's coming up or most
+ * recently happened (people post photos for weeks after the show). Moves to the
+ * next year as soon as that event is added to EVENTS.
+ */
+export function getPhotoYear(now: Date = new Date()): number {
+  return getFeaturedYear(now) ?? getIntakeYear(now)
+}

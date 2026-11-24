@@ -3,6 +3,7 @@ interface CloudflareEnv {
   // Bindings
   DB: D1Database;
   R2: R2Bucket;
+  IMAGES?: import('@cloudflare/workers-types').ImagesBinding;
   
   // Environment variables
   ADMIN_PASSWORD?: string;

@@ -5,6 +5,7 @@ import { getDB } from '@/lib/db';
 import { getIntake } from '@/lib/intakes';
 import { notifyAdmin } from '@/lib/notify';
 import { getIntakeYear } from '@/lib/events';
+import { guardSubmission } from '@/lib/spam';
 
 function sanitize(val: unknown): string | null {
   if (typeof val !== 'string') return null;
@@ -19,6 +20,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   try {
     const body = await request.json();
+    const blocked = await guardSubmission({ db: getDB(), request, scope: 'form', honeypot: body.hp });
+    if (blocked) return blocked;
     const values: Record<string, string | null> = {};
     for (const f of config.fields) {
       values[f.key] = sanitize(body[f.key]);

@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getDB, submissionQueries } from '@/lib/db';
 import { getPublicUrl } from '@/lib/r2';
+import { resolveYear, listYears } from '@/lib/admin/year';
+import { getPhotoYear } from '@/lib/events';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +24,10 @@ export async function GET(request: NextRequest) {
     }
 
     const db = getDB();
-    const submissions = await submissionQueries.getByQueue(db, type);
+    const year = resolveYear(searchParams, getPhotoYear());
+    const submissions = await submissionQueries.getByQueue(db, type, year);
+    const years = await listYears(db, 'submissions');
+    if (!years.includes(getPhotoYear())) years.unshift(getPhotoYear());
 
     // Add public URLs to original images
     const submissionsWithUrls = submissions.map(sub => ({
@@ -33,6 +38,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       queue: type,
       submissions: submissionsWithUrls,
+      year,
+      years,
+      current: getPhotoYear(),
     });
   } catch (error: any) {
     if (error.message === 'Unauthorized') {

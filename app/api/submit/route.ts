@@ -7,6 +7,8 @@ import { uploadToR2, R2_PATHS, isValidImageType, isValidFileSize, getFileExtensi
 import { checkSubmissionText } from '@/lib/moderation/textFilter';
 import { scanImage } from '@/lib/moderation/imageScan';
 import { notifyAdmin } from '@/lib/notify';
+import { getPhotoYear } from '@/lib/events';
+import { guardSubmission } from '@/lib/spam';
 
 async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
   return Promise.race([
@@ -19,6 +21,15 @@ export async function POST(request: NextRequest) {
   try {
     // Parse form data
     const formData = await request.formData();
+
+    const blocked = await guardSubmission({
+      db: getDB(),
+      request,
+      scope: 'photo',
+      honeypot: formData.get('hp'),
+      max: 30,
+    });
+    if (blocked) return blocked;
     
     const file = formData.get('photo');
     const handle = formData.get('handle') as string;
@@ -103,6 +114,7 @@ export async function POST(request: NextRequest) {
       caption: caption || undefined,
       name: name || undefined,
       original_r2_key: r2Key,
+      event_year: getPhotoYear(),
     });
 
     // Update with moderation results

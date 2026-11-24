@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS submissions (
   -- 'pass' | 'flag' | 'error'
   submitted_at TEXT NOT NULL,
   reviewed_at TEXT,
-  approved_at TEXT
+  approved_at TEXT,
+  event_year INTEGER
 );
 
 -- Gallery table (approved, public-facing photos)
@@ -61,7 +62,8 @@ CREATE TABLE IF NOT EXISTS news (
   body TEXT NOT NULL,
   photo_r2_key TEXT,
   published_at TEXT NOT NULL,
-  updated_at TEXT
+  updated_at TEXT,
+  event_year INTEGER
 );
 
 -- Store email captures table
@@ -153,6 +155,13 @@ CREATE TABLE IF NOT EXISTS supporter_submissions (
 
 -- event_year = which Davapalooza the sign-up is for (see migrations/004_event_year.sql)
 
+-- Spam protection: fixed-window counters per hashed visitor (see lib/spam.ts)
+CREATE TABLE IF NOT EXISTS rate_limits (
+  key TEXT PRIMARY KEY,
+  count INTEGER NOT NULL,
+  window_start INTEGER NOT NULL
+);
+
 -- Create indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
 CREATE INDEX IF NOT EXISTS idx_submissions_queue ON submissions(queue);
@@ -160,6 +169,8 @@ CREATE INDEX IF NOT EXISTS idx_submissions_submitted_at ON submissions(submitted
 CREATE INDEX IF NOT EXISTS idx_gallery_approved_at ON gallery(approved_at DESC);
 CREATE INDEX IF NOT EXISTS idx_gallery_sort_order ON gallery(sort_order);
 CREATE INDEX IF NOT EXISTS idx_artists_year ON artists(year);
+CREATE INDEX IF NOT EXISTS idx_submissions_year ON submissions(event_year);
+CREATE INDEX IF NOT EXISTS idx_news_year ON news(event_year);
 CREATE INDEX IF NOT EXISTS idx_band_inquiries_year ON band_inquiries(event_year);
 CREATE INDEX IF NOT EXISTS idx_vendor_registrations_year ON vendor_registrations(event_year);
 CREATE INDEX IF NOT EXISTS idx_volunteers_year ON volunteers(event_year);

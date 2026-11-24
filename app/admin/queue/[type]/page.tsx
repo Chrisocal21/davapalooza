@@ -7,12 +7,15 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import ImageViewer from '@/components/ui/ImageViewer'
+import YearSelect from '@/components/admin/YearSelect'
 
 export default function QueuePage({ params }: { params: Promise<{ type: string }> }) {
   const { type } = use(params)
   const queueType = type as 'looks-good' | 'needs-review'
   const [submissions, setSubmissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [year, setYear] = useState('')
+  const [yearInfo, setYearInfo] = useState<{ years: number[]; current: number }>({ years: [], current: new Date().getFullYear() })
   const [mounted, setMounted] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [viewerIndex, setViewerIndex] = useState(0)
@@ -26,14 +29,15 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
 
   useEffect(() => {
     fetchSubmissions()
-  }, [queueType])
+  }, [queueType, year])
 
   const fetchSubmissions = async () => {
     try {
-      const response = await fetch(`/api/admin/queue?type=${queueType.replace('-', '_')}`)
+      const response = await fetch(`/api/admin/queue?type=${queueType.replace('-', '_')}${year ? `&year=${year}` : ''}`)
       if (response.ok) {
         const data = await response.json()
         setSubmissions(data.submissions || [])
+        setYearInfo({ years: data.years || [], current: data.current })
       }
     } catch (error) {
       console.error('Failed to fetch submissions:', error)
@@ -87,6 +91,8 @@ export default function QueuePage({ params }: { params: Promise<{ type: string }
             ← Back to Dashboard
           </Link>
         </div>
+
+        <YearSelect years={yearInfo.years} current={yearInfo.current} value={year} onChange={setYear} />
 
         {/* Count */}
         <div className="mb-6">

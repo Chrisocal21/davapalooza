@@ -2,18 +2,39 @@
 
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
+import Honeypot from '@/components/ui/Honeypot'
 import Icon from '@/components/ui/Icon'
 import PageHeader from '@/components/ui/PageHeader'
 
 export default function ComingSoon() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [hp, setHp] = useState('')
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Wire to API to save email
-    setSubmitted(true)
-    setEmail('')
+    setError('')
+    setSending(true)
+    try {
+      const res = await fetch('/api/store-waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, hp }),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+        setEmail('')
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || 'Something went wrong. Please try again.')
+      }
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -43,6 +64,7 @@ export default function ComingSoon() {
                 </p>
               ) : (
                 <form onSubmit={handleSubmit} className="mx-auto max-w-md">
+                  <Honeypot value={hp} onChange={setHp} />
                   <label htmlFor="store-email" className="sr-only">
                     Email address
                   </label>
@@ -57,15 +79,20 @@ export default function ComingSoon() {
                       className="field flex-1"
                       required
                     />
-                    <Button type="submit" variant="primary">
-                      Notify Me
+                    <Button type="submit" variant="primary" disabled={sending}>
+                      {sending ? 'Saving...' : 'Notify Me'}
                     </Button>
                   </div>
+                  {error && (
+                    <p role="alert" className="mt-3 text-sm font-semibold text-red-ink">
+                      {error}
+                    </p>
+                  )}
                 </form>
               )}
             </div>
 
-            <p className="eyebrow mt-10 border-t-2 border-ink/10 pt-6 text-muted">Expected Launch: Summer 2026</p>
+            <p className="eyebrow mt-10 border-t-2 border-ink/10 pt-6 text-muted">Launching soon</p>
           </div>
         </div>
       </div>
